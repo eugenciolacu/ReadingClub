@@ -17,7 +17,7 @@ namespace ReadingClub.Infrastructure.Middleware
             {
                 await _next(context);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 context.Response.StatusCode = 500;
                 context.Response.ContentType = "application/json";

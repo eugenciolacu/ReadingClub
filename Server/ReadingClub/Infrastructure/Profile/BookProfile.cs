@@ -10,11 +10,9 @@ namespace ReadingClub.Infrastructure.Profile
         {
             CreateMap<Book, BookDto>()
                 .ForMember(dest => dest.Cover, opt => opt.MapFrom(src => src.Cover != null ? Convert.ToBase64String(src.Cover) : null));
-            //.ForMember(dest => dest.File, opt => opt.MapFrom(src => Convert.ToBase64String(src.File)));
 
             CreateMap<BookExtra, BookDto>()
                 .ForMember(dest => dest.Cover, opt => opt.MapFrom(src => src.Cover != null ? Convert.ToBase64String(src.Cover) : null));
-                //.ForMember(dest => dest.File, opt => opt.MapFrom(src => Convert.ToBase64String(src.File)));
 
             CreateMap<CreateBookDto, Book>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())

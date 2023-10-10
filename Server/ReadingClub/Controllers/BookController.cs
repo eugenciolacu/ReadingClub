@@ -43,19 +43,6 @@ namespace ReadingClub.Controllers
             return Json(new { Status = true, Data = pagedResponse });
         }
 
-        //[HttpGet("details/{id}")]
-        //public async Task<ActionResult> Get(int id)
-        //{
-        //    var bookDto = await _bookService.Get(id);
-
-        //    if (bookDto == null)
-        //    {
-        //        return Json(new { Status = false, Message = "Book not found." });
-        //    }
-
-        //    return Json(new { Status = true, Data = bookDto });
-        //}
-
         [HttpPost("create")]
         public async Task<ActionResult> Create(CreateBookDto createBookDto)
         {
