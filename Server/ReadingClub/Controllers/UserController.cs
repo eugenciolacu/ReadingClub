@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using ReadingClub.Infrastructure.DTO.User;
+﻿using ReadingClub.Infrastructure.DTO.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -17,7 +16,7 @@ namespace ReadingClub.Controllers
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
 
-        public UserController(IUserService userService, IMapper mapper, IConfiguration configuration)
+        public UserController(IUserService userService, IConfiguration configuration)
         {
             _userService = userService;
             _configuration = configuration;
