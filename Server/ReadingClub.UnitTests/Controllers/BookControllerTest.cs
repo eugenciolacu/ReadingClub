@@ -1,10 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Newtonsoft.Json;
 using ReadingClub.Controllers;
 using ReadingClub.Infrastructure.Common.Paging;
 using ReadingClub.Infrastructure.DTO.Book;
+using ReadingClub.Infrastructure.Middleware;
 using ReadingClub.Services.Interfaces;
+using System.Net;
 
 namespace ReadingClub.UnitTests.Controllers
 {
@@ -14,6 +21,7 @@ namespace ReadingClub.UnitTests.Controllers
         private readonly BookController _controller;
 
         private readonly PagedRequest _validPagedRequest;
+        private readonly PagedRequest _invalidPagedRequest;
 
         public BookControllerTest()
         {
@@ -27,6 +35,8 @@ namespace ReadingClub.UnitTests.Controllers
                     { "isbn", "" }
                 },
                 "someEmail");
+
+            _invalidPagedRequest = new PagedRequest() { };
         }
 
         #region GetPagedAdminPage
@@ -37,16 +47,14 @@ namespace ReadingClub.UnitTests.Controllers
         [Fact]
         public void GetPagedAdminPage_WithValidInput_ReturnsActionResult()
         {
-            #region Arrange
-            _mockBookService.Setup(service => service.GetPagedAdminPage(_validPagedRequest))
+            // Arrange
+            _mockBookService.Setup(service => service.GetPagedAdminPage(It.IsAny<PagedRequest>()))
                 .ReturnsAsync(new PagedResponse<BookDto>( new List<BookDto>(), 0 ));
-            #endregion
-
-            #region Act
+            
+            // Act
             var result = _controller.GetPagedAdminPage(_validPagedRequest);
-            #endregion
-
-            #region Assert
+            
+            // Assert
             Assert.IsType<Task<ActionResult>>(result);
 
             var jsonAsString = JsonConvert.SerializeObject(result.Result);
@@ -55,7 +63,37 @@ namespace ReadingClub.UnitTests.Controllers
 
             var pagedResponse = JsonConvert.DeserializeObject<PagedResponse<BookDto>>(jsonAsString);
             Assert.IsType<PagedResponse<BookDto>>(pagedResponse);
-            #endregion
+        }
+
+        [Fact]
+        public async void GetPagedAdminPage_WithInvalidInput_ReturnsErrorResponse()
+        {
+            // Arrange
+            
+            var testServer = new TestServer( new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseMiddleware<ErrorHandlingMiddleware>();
+                    app.Map("/api/book/getPagedAdminPage", appBuilder =>
+                    {
+                        appBuilder.Run(context => throw new Exception("Test exception"));
+                    });
+                }));
+
+            var httpClient = testServer.CreateClient();
+
+
+
+            // Act
+            var response = await httpClient.GetAsync("/api/book/getPagedAdminPage");
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var errorResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
+            Assert.Equal(false, errorResponse.status);
+            Assert.Equal("An unexpected error occurred during processing.", errorResponse.message);
         }
         #endregion
 
@@ -67,16 +105,14 @@ namespace ReadingClub.UnitTests.Controllers
         [Fact]
         public void GetPagedSearchPage_WithValidInput_ReturnsActionResult()
         {
-            #region Arrange
-            _mockBookService.Setup(service => service.GetPagedSearchPage(_validPagedRequest))
+            // Arrange
+            _mockBookService.Setup(service => service.GetPagedSearchPage(It.IsAny<PagedRequest>()))
                 .ReturnsAsync(new PagedResponse<BookDto>( new List<BookDto>(), 0 ));
-            #endregion
 
-            #region Act
+            // Act
             var result = _controller.GetPagedSearchPage(_validPagedRequest);
-            #endregion
 
-            #region Assert
+            // Assert
             Assert.IsType<Task<ActionResult>>(result);
 
             var jsonAsString = JsonConvert.SerializeObject(result.Result);
@@ -85,7 +121,6 @@ namespace ReadingClub.UnitTests.Controllers
 
             var pagedResponse = JsonConvert.DeserializeObject<PagedResponse<BookDto>>(jsonAsString);
             Assert.IsType<PagedResponse<BookDto>>(pagedResponse);
-            #endregion
         }
         #endregion
 
@@ -97,16 +132,14 @@ namespace ReadingClub.UnitTests.Controllers
         [Fact]
         public void GetPagedReadingListPage_WithValidInput_ReturnsActionResult()
         {
-            #region Arrange
-            _mockBookService.Setup(service => service.GetPagedReadingListPage(_validPagedRequest))
+            // Arrange
+            _mockBookService.Setup(service => service.GetPagedReadingListPage(It.IsAny<PagedRequest>()))
                 .ReturnsAsync(new PagedResponse<BookDto>( new List<BookDto>(), 0 ));
-            #endregion
 
-            #region Act
+            // Act
             var result = _controller.GetPagedReadingListPage( _validPagedRequest);
-            #endregion
 
-            #region Assert
+            // Assert
             Assert.IsType<Task<ActionResult>>(result);
 
             var jsonAsString = JsonConvert.SerializeObject(result.Result);
@@ -115,7 +148,6 @@ namespace ReadingClub.UnitTests.Controllers
 
             var pagedResponse = JsonConvert.DeserializeObject<PagedResponse<BookDto>>(jsonAsString);
             Assert.IsType<PagedResponse<BookDto>>(pagedResponse);
-            #endregion
         }
         #endregion
 
@@ -127,7 +159,7 @@ namespace ReadingClub.UnitTests.Controllers
         [Fact]
         public void Create_WithInvalidInput_ReturnsBadRequest()
         {
-            #region Arrange
+            // Arrange
             var createBookDto = new CreateBookDto()
             {
                 Title = null!,
@@ -140,14 +172,12 @@ namespace ReadingClub.UnitTests.Controllers
                 FileName = null!,
                 AddedByEmail = null!
             };
-            #endregion
 
-            #region Act
+            // Act
             var result = _controller.Create(createBookDto);
-            #endregion
 
-            #region Assert
-            #endregion
+            // Assert
+
         }
 
         [Fact]

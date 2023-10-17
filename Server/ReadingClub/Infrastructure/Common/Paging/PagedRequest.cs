@@ -2,6 +2,10 @@
 {
     public class PagedRequest
     {
+        public PagedRequest()
+        {
+        }
+
         public PagedRequest(int pageSize, int page, string orderBy, string orderDirection, Dictionary<string, string> filters, string? userEmail = null) 
         {
             PageSize = pageSize;
