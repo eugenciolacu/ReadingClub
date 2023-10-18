@@ -5,7 +5,12 @@ VisualStudioVersion = 17.5.33502.453
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReadingClub", "ReadingClub.csproj", "{92A50B14-04E9-43A3-AA95-A05FCFE9CBB1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadingClub.UnitTests", "..\ReadingClub.UnitTests\ReadingClub.UnitTests.csproj", "{16280067-9C65-4145-8CE9-B4E76D497369}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReadingClub.UnitTests", "..\ReadingClub.UnitTests\ReadingClub.UnitTests.csproj", "{16280067-9C65-4145-8CE9-B4E76D497369}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{398CD3A2-93FB-495C-9337-58129849F350}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

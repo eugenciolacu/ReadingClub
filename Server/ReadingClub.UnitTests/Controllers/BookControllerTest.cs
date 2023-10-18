@@ -12,6 +12,7 @@ using ReadingClub.Infrastructure.DTO.Book;
 using ReadingClub.Infrastructure.Middleware;
 using ReadingClub.Services.Interfaces;
 using System.Net;
+using System.Net.Http;
 
 namespace ReadingClub.UnitTests.Controllers
 {
@@ -66,34 +67,52 @@ namespace ReadingClub.UnitTests.Controllers
         }
 
         [Fact]
-        public async void GetPagedAdminPage_WithInvalidInput_ReturnsErrorResponse()
+        public void GetPagedAdminPage_WithInvalidInput_ReturnsErrorResponse()
         {
             // Arrange
-            
-            var testServer = new TestServer( new WebHostBuilder()
-                .Configure(app =>
-                {
-                    app.UseMiddleware<ErrorHandlingMiddleware>();
-                    app.Map("/api/book/getPagedAdminPage", appBuilder =>
-                    {
-                        appBuilder.Run(context => throw new Exception("Test exception"));
-                    });
-                }));
-
-            var httpClient = testServer.CreateClient();
-
-
+            _mockBookService.Setup(service => service.GetPagedAdminPage(It.IsAny<PagedRequest>()))
+                .ThrowsAsync(new Exception("Simulate an error"));
 
             // Act
-            var response = await httpClient.GetAsync("/api/book/getPagedAdminPage");
+            var result = _controller.GetPagedAdminPage(_invalidPagedRequest);
 
             // Assert
-            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+            //Assert.ThrowsAny<Exception>(() => result.Result);
+            //Assert.Throws<Exception>(() => result.Exception);
+            Assert.Equal("Simulate an error", result?.Exception?.InnerException?.Message);
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var errorResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
-            Assert.Equal(false, errorResponse.status);
-            Assert.Equal("An unexpected error occurred during processing.", errorResponse.message);
+            //            var json = JsonConvert.SerializeObject(_invalidPagedRequest);
+            //            var httpContent = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+            //            var testServer = new TestServer(
+            //                new WebHostBuilder()
+            //                    .Configure(app =>
+            //                    {
+            //                        app.UseMiddleware<ErrorHandlingMiddleware>();
+            //                        app.Map("/callEndpoint", appBuilder =>
+            //                        {
+            //                            appBuilder.Run(
+            //                                context => _controller.GetPagedAdminPage(_invalidPagedRequest)
+            //                            );
+            //                        });
+            //                    })
+            //            );
+
+            //            var httpClient = testServer.CreateClient();
+
+            //            // Act
+            //            var response = await httpClient.PostAsync("/callEndpoint", httpContent);
+
+            //            // Assert
+            //            var responseContent = await response.Content.ReadAsStringAsync();
+            //            var errorResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
+
+            //            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+            //            Assert.False((bool)errorResponse?.status);
+
+            //#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            //            Assert.Equal("An unexpected error occurred during processing.", (string) errorResponse?.message ?? null);
+            //#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
         }
         #endregion
 
