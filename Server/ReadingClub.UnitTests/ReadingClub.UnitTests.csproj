@@ -25,7 +25,6 @@
 
   <ItemGroup>
     <Folder Include="Infrastructure\Common\Helpers\" />
-    <Folder Include="Infrastructure\Middleware\" />
     <Folder Include="Infrastructure\Profile\" />
     <Folder Include="Repositories\Implementations\" />
     <Folder Include="Services\Implementations\" />

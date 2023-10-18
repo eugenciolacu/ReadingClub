@@ -77,42 +77,45 @@ namespace ReadingClub.UnitTests.Controllers
             var result = _controller.GetPagedAdminPage(_invalidPagedRequest);
 
             // Assert
-            //Assert.ThrowsAny<Exception>(() => result.Result);
-            //Assert.Throws<Exception>(() => result.Exception);
             Assert.Equal("Simulate an error", result?.Exception?.InnerException?.Message);
+        }
 
-            //            var json = JsonConvert.SerializeObject(_invalidPagedRequest);
-            //            var httpContent = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+        [Fact]
+        public async void GetPagedAdminPage_WithInvalidInput_ReturnsErrorResponse_AlternativeTestImplementation()
+        {
+            // Arrange
+            _mockBookService.Setup(service => service.GetPagedAdminPage(It.IsAny<PagedRequest>()))
+                .ThrowsAsync(new Exception("Simulate an error"));
 
-            //            var testServer = new TestServer(
-            //                new WebHostBuilder()
-            //                    .Configure(app =>
-            //                    {
-            //                        app.UseMiddleware<ErrorHandlingMiddleware>();
-            //                        app.Map("/callEndpoint", appBuilder =>
-            //                        {
-            //                            appBuilder.Run(
-            //                                context => _controller.GetPagedAdminPage(_invalidPagedRequest)
-            //                            );
-            //                        });
-            //                    })
-            //            );
+            var json = JsonConvert.SerializeObject(_invalidPagedRequest);
+            var httpContent = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-            //            var httpClient = testServer.CreateClient();
+            var testServer = new TestServer(
+                new WebHostBuilder()
+                    .Configure(app =>
+                    {
+                        app.UseMiddleware<ErrorHandlingMiddleware>();
+                        app.Map("/callEndpoint", appBuilder =>
+                        {
+                            appBuilder.Run(
+                                context => _controller.GetPagedAdminPage(_invalidPagedRequest)
+                            );
+                        });
+                    })
+            );
 
-            //            // Act
-            //            var response = await httpClient.PostAsync("/callEndpoint", httpContent);
+            var httpClient = testServer.CreateClient();
 
-            //            // Assert
-            //            var responseContent = await response.Content.ReadAsStringAsync();
-            //            var errorResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
+            // Act
+            var response = await httpClient.PostAsync("/callEndpoint", httpContent);
 
-            //            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-            //            Assert.False((bool)errorResponse?.status);
+            // Assert
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var errorResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
 
-            //#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-            //            Assert.Equal("An unexpected error occurred during processing.", (string) errorResponse?.message ?? null);
-            //#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+            Assert.False((bool)errorResponse?.status);
+            Assert.Equal("An unexpected error occurred during processing.", (string)errorResponse?.message! ?? null);
         }
         #endregion
 
@@ -141,6 +144,20 @@ namespace ReadingClub.UnitTests.Controllers
             var pagedResponse = JsonConvert.DeserializeObject<PagedResponse<BookDto>>(jsonAsString);
             Assert.IsType<PagedResponse<BookDto>>(pagedResponse);
         }
+
+        [Fact]
+        public void GetPagedSearchPage_WithInvalidInput_ReturnsErrorResponse()
+        {
+            // Arrange
+            _mockBookService.Setup(service => service.GetPagedSearchPage(It.IsAny<PagedRequest>()))
+                .ThrowsAsync(new Exception("Simulate an error"));
+
+            // Act
+            var result = _controller.GetPagedSearchPage(_invalidPagedRequest);
+
+            // Assert
+            Assert.Equal("Simulate an error", result?.Exception?.InnerException?.Message);
+        }
         #endregion
 
         #region GetPagedReadingListPage
@@ -167,6 +184,20 @@ namespace ReadingClub.UnitTests.Controllers
 
             var pagedResponse = JsonConvert.DeserializeObject<PagedResponse<BookDto>>(jsonAsString);
             Assert.IsType<PagedResponse<BookDto>>(pagedResponse);
+        }
+
+        [Fact]
+        public void GetPagedReadingListPage_WithInvalidInput_ReturnsErrorResponse()
+        {
+            // Arrange
+            _mockBookService.Setup(service => service.GetPagedReadingListPage(It.IsAny<PagedRequest>()))
+                .ThrowsAsync(new Exception("Simulate an error"));
+
+            // Act
+            var result = _controller.GetPagedReadingListPage(_invalidPagedRequest);
+
+            // Assert
+            Assert.Equal("Simulate an error", result?.Exception?.InnerException?.Message);
         }
         #endregion
 
