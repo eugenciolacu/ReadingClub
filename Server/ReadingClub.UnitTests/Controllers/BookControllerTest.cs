@@ -210,29 +210,65 @@ namespace ReadingClub.UnitTests.Controllers
         public void Create_WithInvalidInput_ReturnsBadRequest()
         {
             // Arrange
-            var createBookDto = new CreateBookDto()
-            {
-                Title = null!,
-                Authors = null!,
-                ISBN = null,
-                Description = null,
-                Cover = null,
-                CoverName = null,
-                File = null!,
-                FileName = null!,
-                AddedByEmail = null!
-            };
+            var createBookDto = new CreateBookDto() { };
+
+            _controller.ModelState.AddModelError("File", "The File field is required.");
+            _controller.ModelState.AddModelError("Title", "The Title field is required.");
+            _controller.ModelState.AddModelError("Authors", "The Authors field is required.");
+            _controller.ModelState.AddModelError("FileName", "The FileName field is required.");
+            _controller.ModelState.AddModelError("AddedByEmail", "The AddedByEmail field is required.");
 
             // Act
             var result = _controller.Create(createBookDto);
 
             // Assert
-
+            Assert.IsType<Task<ActionResult>>(result);            
+            Assert.Equal(400, (result.Result as ObjectResult)?.StatusCode);
         }
 
         [Fact]
         public void Create_WithValidInput_ReturnsActionResult()
         {
+            // Arrange
+            var createBookDto = new CreateBookDto() { };
+
+            _mockBookService.Setup(service => service.Create(It.IsAny<CreateBookDto>()))
+                .ReturnsAsync(new BookDto() { });
+
+            // Act
+            var result = _controller.Create(createBookDto);
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("Status", jsonAsString);
+            Assert.Contains("Data", jsonAsString);
+
+            var book = JsonConvert.DeserializeObject<BookDto>(jsonAsString);
+            
+
+
+
+
+
+            
+
+
+
+
+            //Assert.IsType<BookDto>(bookDto);
+
+
+
+
+            // Assert
+            //var responseContent = await response.Content.ReadAsStringAsync();
+            //var errorResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
+
+            //Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+            //Assert.False((bool)errorResponse?.status);
+            //Assert.Equal("An unexpected error occurred during processing.", (string)errorResponse?.message! ?? null);
 
         }
         #endregion
