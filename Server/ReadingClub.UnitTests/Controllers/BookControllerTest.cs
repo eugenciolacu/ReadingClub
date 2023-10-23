@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Newtonsoft.Json;
 using ReadingClub.Controllers;
+using ReadingClub.Domain;
 using ReadingClub.Infrastructure.Common.Paging;
 using ReadingClub.Infrastructure.DTO.Book;
 using ReadingClub.Infrastructure.Middleware;
@@ -64,6 +64,7 @@ namespace ReadingClub.UnitTests.Controllers
 
             var pagedResponse = JsonConvert.DeserializeObject<PagedResponse<BookDto>>(jsonAsString);
             Assert.IsType<PagedResponse<BookDto>>(pagedResponse);
+            Assert.NotNull(pagedResponse);
         }
 
         [Fact]
@@ -143,6 +144,7 @@ namespace ReadingClub.UnitTests.Controllers
 
             var pagedResponse = JsonConvert.DeserializeObject<PagedResponse<BookDto>>(jsonAsString);
             Assert.IsType<PagedResponse<BookDto>>(pagedResponse);
+            Assert.NotNull(pagedResponse);
         }
 
         [Fact]
@@ -184,6 +186,7 @@ namespace ReadingClub.UnitTests.Controllers
 
             var pagedResponse = JsonConvert.DeserializeObject<PagedResponse<BookDto>>(jsonAsString);
             Assert.IsType<PagedResponse<BookDto>>(pagedResponse);
+            Assert.NotNull(pagedResponse);
         }
 
         [Fact]
@@ -246,30 +249,8 @@ namespace ReadingClub.UnitTests.Controllers
             Assert.Contains("Data", jsonAsString);
 
             var book = JsonConvert.DeserializeObject<BookDto>(jsonAsString);
-            
-
-
-
-
-
-            
-
-
-
-
-            //Assert.IsType<BookDto>(bookDto);
-
-
-
-
-            // Assert
-            //var responseContent = await response.Content.ReadAsStringAsync();
-            //var errorResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
-
-            //Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-            //Assert.False((bool)errorResponse?.status);
-            //Assert.Equal("An unexpected error occurred during processing.", (string)errorResponse?.message! ?? null);
-
+            Assert.IsType<BookDto>(book);
+            Assert.NotNull(book);
         }
         #endregion
 
