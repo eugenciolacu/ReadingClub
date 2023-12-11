@@ -260,9 +260,70 @@ namespace ReadingClub.UnitTests.Controllers
             Assert.True(TestHelper.IsHttpActionAttributePresent(_controller, "Update", typeof(HttpPutAttribute)));
 
         [Fact]
+        public void Update_WithInvalidInput_ReturnsBadRequest()
+        {
+            // Arrange
+            var updateBookDto = new UpdateBookDto() { };
+
+            _controller.ModelState.AddModelError("File", "The File field is required.");
+            _controller.ModelState.AddModelError("Title", "The Title field is required.");
+            _controller.ModelState.AddModelError("Authors", "The Authors field is required.");
+            _controller.ModelState.AddModelError("FileName", "The FileName field is required.");
+
+            // Act
+            var result = _controller.Update(updateBookDto);
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+            Assert.Equal(400, (result.Result as ObjectResult)?.StatusCode);
+        }
+
+        [Fact]
+        public void Update_WithInvalidInput_ReturnsErrorResponse()
+        {
+            // Arrange
+            var updateBookDto = new UpdateBookDto() { };
+
+            BookDto? bookDto = null;
+
+            _mockBookService.Setup(service => service.Get(It.IsAny<int>()))
+                !.ReturnsAsync(bookDto);
+
+            // Act
+            var result = _controller.Update(updateBookDto);
+
+            // Assert
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("Status", jsonAsString);
+            Assert.Contains("Message", jsonAsString);
+            Assert.Contains("An error occurred during processing, book not found.", jsonAsString);
+        }
+
+        [Fact]
         public void Update_WithValidInput_ReturnsActionResult()
         {
+            // Arrange
+            var updateBookDto = new UpdateBookDto() { };
 
+            _mockBookService.Setup(service => service.Get(It.IsAny<int>()))
+                .ReturnsAsync(new BookDto() { });
+
+            _mockBookService.Setup(service => service.Update(It.IsAny<UpdateBookDto>()))
+                .ReturnsAsync(new BookDto() { });
+
+            // Act
+            var result = _controller.Update(updateBookDto);
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("Status", jsonAsString);
+            Assert.Contains("Data", jsonAsString);
+
+            var book = JsonConvert.DeserializeObject<BookDto>(jsonAsString);
+            Assert.IsType<BookDto>(book);
+            Assert.NotNull(book);
         }
         #endregion
 
