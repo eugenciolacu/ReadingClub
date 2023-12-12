@@ -6,13 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Newtonsoft.Json;
 using ReadingClub.Controllers;
-using ReadingClub.Domain;
 using ReadingClub.Infrastructure.Common.Paging;
+using ReadingClub.Infrastructure.DTO;
 using ReadingClub.Infrastructure.DTO.Book;
 using ReadingClub.Infrastructure.Middleware;
 using ReadingClub.Services.Interfaces;
 using System.Net;
-using System.Net.Http;
 
 namespace ReadingClub.UnitTests.Controllers
 {
@@ -23,6 +22,8 @@ namespace ReadingClub.UnitTests.Controllers
 
         private readonly PagedRequest _validPagedRequest;
         private readonly PagedRequest _invalidPagedRequest;
+
+        private readonly BookToReadingListDto _bookToReadingListDto;
 
         public BookControllerTest()
         {
@@ -38,6 +39,8 @@ namespace ReadingClub.UnitTests.Controllers
                 "someEmail");
 
             _invalidPagedRequest = new PagedRequest() { };
+
+            _bookToReadingListDto = new BookToReadingListDto("someEmail@.gmail.com", 1, false);
         }
 
         #region GetPagedAdminPage
@@ -59,7 +62,7 @@ namespace ReadingClub.UnitTests.Controllers
             Assert.IsType<Task<ActionResult>>(result);
 
             var jsonAsString = JsonConvert.SerializeObject(result.Result);
-            Assert.Contains("Status", jsonAsString);
+            Assert.Contains("\"Status\":true", jsonAsString);
             Assert.Contains("Data", jsonAsString);
 
             var pagedResponse = JsonConvert.DeserializeObject<PagedResponse<BookDto>>(jsonAsString);
@@ -139,7 +142,7 @@ namespace ReadingClub.UnitTests.Controllers
             Assert.IsType<Task<ActionResult>>(result);
 
             var jsonAsString = JsonConvert.SerializeObject(result.Result);
-            Assert.Contains("Status", jsonAsString);
+            Assert.Contains("\"Status\":true", jsonAsString);
             Assert.Contains("Data", jsonAsString);
 
             var pagedResponse = JsonConvert.DeserializeObject<PagedResponse<BookDto>>(jsonAsString);
@@ -181,7 +184,7 @@ namespace ReadingClub.UnitTests.Controllers
             Assert.IsType<Task<ActionResult>>(result);
 
             var jsonAsString = JsonConvert.SerializeObject(result.Result);
-            Assert.Contains("Status", jsonAsString);
+            Assert.Contains("\"Status\":true", jsonAsString);
             Assert.Contains("Data", jsonAsString);
 
             var pagedResponse = JsonConvert.DeserializeObject<PagedResponse<BookDto>>(jsonAsString);
@@ -245,7 +248,7 @@ namespace ReadingClub.UnitTests.Controllers
             Assert.IsType<Task<ActionResult>>(result);
 
             var jsonAsString = JsonConvert.SerializeObject(result.Result);
-            Assert.Contains("Status", jsonAsString);
+            Assert.Contains("\"Status\":true", jsonAsString);
             Assert.Contains("Data", jsonAsString);
 
             var book = JsonConvert.DeserializeObject<BookDto>(jsonAsString);
@@ -294,9 +297,8 @@ namespace ReadingClub.UnitTests.Controllers
 
             // Assert
             var jsonAsString = JsonConvert.SerializeObject(result.Result);
-            Assert.Contains("Status", jsonAsString);
-            Assert.Contains("Message", jsonAsString);
-            Assert.Contains("An error occurred during processing, book not found.", jsonAsString);
+            Assert.Contains("\"Status\":false", jsonAsString);
+            Assert.Contains("\"Message\":\"An error occurred during processing, book not found.\"", jsonAsString);
         }
 
         [Fact]
@@ -318,7 +320,7 @@ namespace ReadingClub.UnitTests.Controllers
             Assert.IsType<Task<ActionResult>>(result);
 
             var jsonAsString = JsonConvert.SerializeObject(result.Result);
-            Assert.Contains("Status", jsonAsString);
+            Assert.Contains("\"Status\":true", jsonAsString);
             Assert.Contains("Data", jsonAsString);
 
             var book = JsonConvert.DeserializeObject<BookDto>(jsonAsString);
@@ -333,9 +335,43 @@ namespace ReadingClub.UnitTests.Controllers
             Assert.True(TestHelper.IsHttpActionAttributePresent(_controller, "Delete", typeof(HttpDeleteAttribute)));
 
         [Fact]
+        public void Delete_WithInvalidInput_ReturnsErrorResponse()
+        {
+            // Arrange
+            BookDto? bookDto = null;
+
+            _mockBookService.Setup(service => service.Delete(It.IsAny<int>()))
+                !.ReturnsAsync(bookDto);
+
+            // Act
+            var result = _controller.Delete(1);
+
+            // Assert
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":false", jsonAsString);
+            Assert.Contains("\"Message\":\"An error occurred during processing, book not found.\"", jsonAsString);
+        }
+
+        [Fact]
         public void Delete_WithValidInput_ReturnsActionResult()
         {
+            // Arraneg
+            _mockBookService.Setup(service => service.Delete(It.IsAny<int>()))
+                .ReturnsAsync(new BookDto() { });
 
+            // Act
+            var result = _controller.Delete(1);
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":true", jsonAsString);
+            Assert.Contains("Data", jsonAsString);
+
+            var book = JsonConvert.DeserializeObject<BookDto>(jsonAsString);
+            Assert.IsType<BookDto>(book);
+            Assert.NotNull(book);
         }
         #endregion
 
@@ -347,7 +383,17 @@ namespace ReadingClub.UnitTests.Controllers
         [Fact]
         public void AddToReadingList_WithValidInput_ReturnsActionResult()
         {
+            // Arrange
+            _mockBookService.Setup(service => service.AddToReadingList(It.IsAny<BookToReadingListDto>()));
 
+            // Act
+            var result = _controller.AddToReadingList(_bookToReadingListDto);
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":true", jsonAsString);
         }
         #endregion
 
@@ -359,7 +405,17 @@ namespace ReadingClub.UnitTests.Controllers
         [Fact]
         public void RemoveFromReadingList_WithValidInput_ReturnsActionResult()
         {
+            // Arrange 
+            _mockBookService.Setup(service => service.RemoveFromReadingList(It.IsAny<BookToReadingListDto>()));
 
+            // Act 
+            var result = _controller.RemoveFromReadingList(_bookToReadingListDto);
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":true", jsonAsString);
         }
         #endregion
 
@@ -371,7 +427,17 @@ namespace ReadingClub.UnitTests.Controllers
         [Fact]
         public void MarkAsReadOrUnread_WithValidInput_ReturnsActionResult()
         {
+            // Arrange 
+            _mockBookService.Setup(service => service.MarkAsReadOrUnread(It.IsAny<BookToReadingListDto>()));
 
+            // Act 
+            var result = _controller.MarkAsReadOrUnread(_bookToReadingListDto);
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":true", jsonAsString);
         }
         #endregion
 
@@ -383,7 +449,21 @@ namespace ReadingClub.UnitTests.Controllers
         [Fact]
         public void GetStatistics_WithValidInput_ReturnsActionResult()
         {
+            // Arrange
+            _mockBookService.Setup(service => service.GetStatistics(It.IsAny<string>()))
+                .ReturnsAsync(new BookStatisticsDto() { });
 
+            // Act
+            var result = _controller.GetStatistics(new UserEmailDto() { });
+
+            // Assert
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":true", jsonAsString);
+            Assert.Contains("Data", jsonAsString);
+
+            var bookStatisticsDto = JsonConvert.DeserializeObject<BookStatisticsDto>(jsonAsString);
+            Assert.IsType<BookStatisticsDto>(bookStatisticsDto);
+            Assert.NotNull(bookStatisticsDto);
         }
         #endregion
 
@@ -393,9 +473,43 @@ namespace ReadingClub.UnitTests.Controllers
             Assert.True(TestHelper.IsHttpActionAttributePresent(_controller, "GetBookForDownload", typeof(HttpPostAttribute)));
 
         [Fact]
+        public void GetBookForDownload_WithValidInput_ReturnsErrorResponse()
+        {
+            // Arrange
+            string? book = null;
+
+            _mockBookService.Setup(service => service.GetBookForDownload(It.IsAny<int>()))
+                .ReturnsAsync(book);
+
+            // Act
+            var result = _controller.GetBookForDownload(new BookToStringFileDto() { });
+
+            // Assert
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":false", jsonAsString);
+            Assert.Contains("\"Message\":\"An error occurred during processing, book not found.\"", jsonAsString);
+        }
+
+        [Fact]
         public void GetBookForDownload_WithValidInput_ReturnsActionResult()
         {
+            // Arrange
+            _mockBookService.Setup(service => service.GetBookForDownload(It.IsAny<int>()))
+                .ReturnsAsync("Base64String representing a file");
 
+            // Act
+            var result = _controller.GetBookForDownload(new BookToStringFileDto() { });
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":true", jsonAsString);
+            Assert.Contains("Data", jsonAsString);
+
+            var book = JsonConvert.DeserializeObject<dynamic>(jsonAsString);
+            var data = book!["Value"]["Data"];
+            Assert.NotNull(data);
         }
         #endregion
     }
