@@ -73,7 +73,7 @@ namespace ReadingClub.Controllers
 
         [AllowAnonymous]
         [HttpPost("isTokenValid")]
-        public async Task<IActionResult> IsTokenValidAsync([FromBody] TokenDto tokenDto) 
+        public async Task<IActionResult> IsTokenValid([FromBody] TokenDto tokenDto) 
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var validationParameters = new TokenValidationParameters

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.TestHost;
@@ -43,10 +44,25 @@ namespace ReadingClub.UnitTests.Controllers
             _bookToReadingListDto = new BookToReadingListDto("someEmail@.gmail.com", 1, false);
         }
 
+        #region class level tests
+        [Fact]
+        public void BookController_ShouldHave_AuthorizeAttribute() =>
+            Assert.True(TestHelper.IsAttributePresentAtControllerLevel(_controller, typeof(AuthorizeAttribute)));
+
+        [Fact]
+        public void BookController_ShouldHave_RouteAttribute() => 
+            Assert.True(TestHelper.IsAttributePresentAtControllerLevel(_controller, typeof(RouteAttribute)));
+
+        [Fact]
+        public void BookController_ShouldHave_ApiControllerAttribute() =>
+            Assert.True(TestHelper.IsAttributePresentAtControllerLevel(_controller, typeof(ApiControllerAttribute)));
+
+        #endregion
+
         #region GetPagedAdminPage
         [Fact]
         public void GetPagedAdminPage_ShouldHave_HttpPostAction() =>
-            Assert.True(TestHelper.IsHttpActionAttributePresent(_controller, "GetPagedAdminPage", typeof(HttpPostAttribute)));
+            Assert.True(TestHelper.IsAttributePresent(_controller, "GetPagedAdminPage", typeof(HttpPostAttribute)));
 
         [Fact]
         public void GetPagedAdminPage_WithValidInput_ReturnsActionResult()
@@ -126,7 +142,7 @@ namespace ReadingClub.UnitTests.Controllers
         #region GetPagedSearchPage
         [Fact]
         public void GetPagedSearchPage_ShouldHave_HttpPostAction() =>
-            Assert.True(TestHelper.IsHttpActionAttributePresent(_controller, "GetPagedSearchPage", typeof(HttpPostAttribute)));
+            Assert.True(TestHelper.IsAttributePresent(_controller, "GetPagedSearchPage", typeof(HttpPostAttribute)));
 
         [Fact]
         public void GetPagedSearchPage_WithValidInput_ReturnsActionResult()
@@ -168,7 +184,7 @@ namespace ReadingClub.UnitTests.Controllers
         #region GetPagedReadingListPage
         [Fact]
         public void GetPagedReadingListPage_ShouldHave_HttpPostAction() =>
-            Assert.True(TestHelper.IsHttpActionAttributePresent(_controller, "GetPagedReadingListPage", typeof(HttpPostAttribute)));
+            Assert.True(TestHelper.IsAttributePresent(_controller, "GetPagedReadingListPage", typeof(HttpPostAttribute)));
 
         [Fact]
         public void GetPagedReadingListPage_WithValidInput_ReturnsActionResult()
@@ -210,7 +226,7 @@ namespace ReadingClub.UnitTests.Controllers
         #region Create
         [Fact]
         public void Create_ShouldHave_HttpPostAction() =>
-            Assert.True(TestHelper.IsHttpActionAttributePresent(_controller, "Create", typeof(HttpPostAttribute)));
+            Assert.True(TestHelper.IsAttributePresent(_controller, "Create", typeof(HttpPostAttribute)));
         
         [Fact]
         public void Create_WithInvalidInput_ReturnsBadRequest()
@@ -260,7 +276,7 @@ namespace ReadingClub.UnitTests.Controllers
         #region Update
         [Fact]
         public void Update_ShouldHave_HttpPutAction() =>
-            Assert.True(TestHelper.IsHttpActionAttributePresent(_controller, "Update", typeof(HttpPutAttribute)));
+            Assert.True(TestHelper.IsAttributePresent(_controller, "Update", typeof(HttpPutAttribute)));
 
         [Fact]
         public void Update_WithInvalidInput_ReturnsBadRequest()
@@ -332,7 +348,7 @@ namespace ReadingClub.UnitTests.Controllers
         #region Delete
         [Fact]
         public void Delete_ShouldHave_HttpDeleteAction() =>
-            Assert.True(TestHelper.IsHttpActionAttributePresent(_controller, "Delete", typeof(HttpDeleteAttribute)));
+            Assert.True(TestHelper.IsAttributePresent(_controller, "Delete", typeof(HttpDeleteAttribute)));
 
         [Fact]
         public void Delete_WithInvalidInput_ReturnsErrorResponse()
@@ -378,7 +394,7 @@ namespace ReadingClub.UnitTests.Controllers
         #region AddToReadingList
         [Fact]
         public void AddToReadingList_ShouldHave_HttpPostAction() =>
-            Assert.True(TestHelper.IsHttpActionAttributePresent(_controller, "AddToReadingList", typeof(HttpPostAttribute)));
+            Assert.True(TestHelper.IsAttributePresent(_controller, "AddToReadingList", typeof(HttpPostAttribute)));
 
         [Fact]
         public void AddToReadingList_WithValidInput_ReturnsActionResult()
@@ -400,7 +416,7 @@ namespace ReadingClub.UnitTests.Controllers
         #region RemoveFromReadingList
         [Fact]
         public void RemoveFromReadingList_ShouldHave_HttpPostAction() =>
-            Assert.True(TestHelper.IsHttpActionAttributePresent(_controller, "RemoveFromReadingList", typeof(HttpPostAttribute)));
+            Assert.True(TestHelper.IsAttributePresent(_controller, "RemoveFromReadingList", typeof(HttpPostAttribute)));
 
         [Fact]
         public void RemoveFromReadingList_WithValidInput_ReturnsActionResult()
@@ -422,7 +438,7 @@ namespace ReadingClub.UnitTests.Controllers
         #region MarkAsReadOrUnread
         [Fact]
         public void MarkAsReadOrUnread_ShouldHave_HttpPostAction() =>
-            Assert.True(TestHelper.IsHttpActionAttributePresent(_controller, "MarkAsReadOrUnread", typeof(HttpPostAttribute)));
+            Assert.True(TestHelper.IsAttributePresent(_controller, "MarkAsReadOrUnread", typeof(HttpPostAttribute)));
 
         [Fact]
         public void MarkAsReadOrUnread_WithValidInput_ReturnsActionResult()
@@ -444,7 +460,7 @@ namespace ReadingClub.UnitTests.Controllers
         #region GetStatistics
         [Fact]
         public void GetStatistics_ShouldHave_HttpPostAction() =>
-            Assert.True(TestHelper.IsHttpActionAttributePresent(_controller, "GetStatistics", typeof(HttpPostAttribute)));
+            Assert.True(TestHelper.IsAttributePresent(_controller, "GetStatistics", typeof(HttpPostAttribute)));
 
         [Fact]
         public void GetStatistics_WithValidInput_ReturnsActionResult()
@@ -470,7 +486,7 @@ namespace ReadingClub.UnitTests.Controllers
         #region GetBookForDownload
         [Fact]
         public void GetBookForDownload_ShouldHave_HttpPostAction() =>
-            Assert.True(TestHelper.IsHttpActionAttributePresent(_controller, "GetBookForDownload", typeof(HttpPostAttribute)));
+            Assert.True(TestHelper.IsAttributePresent(_controller, "GetBookForDownload", typeof(HttpPostAttribute)));
 
         [Fact]
         public void GetBookForDownload_WithValidInput_ReturnsErrorResponse()

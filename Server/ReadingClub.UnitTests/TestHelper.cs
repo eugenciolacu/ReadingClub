@@ -4,11 +4,20 @@ namespace ReadingClub.UnitTests
 {
     public static class TestHelper
     {
-        public static bool IsHttpActionAttributePresent(Controller controller, string method, Type httpAttribute)
+        public static bool IsAttributePresent(Controller controller, string method, Type attribute)
         {
             var exists = controller.GetType()
                 .GetMethod(method)
-                ?.GetCustomAttributes(httpAttribute, false)
+                ?.GetCustomAttributes(attribute, false)
+                .Any();
+
+            return exists ?? false;
+        }
+
+        public static bool IsAttributePresentAtControllerLevel(Controller controller, Type attribute)
+        {
+            var exists = controller.GetType()
+                ?.GetCustomAttributes(attribute, false)
                 .Any();
 
             return exists ?? false;
