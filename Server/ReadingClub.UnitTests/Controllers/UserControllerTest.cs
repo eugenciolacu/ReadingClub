@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -363,10 +362,84 @@ namespace ReadingClub.UnitTests.Controllers
         [Fact]
         public void Update_ShouldHave_HttpPutAction() =>
             Assert.True(TestHelper.IsAttributePresent(_controller, "Update", typeof(HttpPutAttribute)));
-        
-        
-        
-        
+
+        [Fact]
+        public void Update_WithInvalidInput_ReturnsBadRequest()
+        {
+            // Arrange
+            var updateUserDtoWhenEmptyFields = new UpdateUserDto() { };
+
+            _controller.ModelState.AddModelError("UserName", "The User name field is required.");
+            _controller.ModelState.AddModelError("Email", "The Email address is required.");
+            _controller.ModelState.AddModelError("ConfirmPassword", "The Confirm cassword field is required.");
+
+            var updateUserDtoWhenInvalidFields = new UpdateUserDto()
+            {
+                UserName = "Test",
+                Email = "Test",
+                Password = "Test",
+                ConfirmPassword = "Something different",
+            };
+
+            _controller.ModelState.AddModelError("Email", "Invalid Email address.");
+            _controller.ModelState.AddModelError("ConfirmPassword", "The Password and Confirmation password do not match.");
+
+            // Act
+            var resultWhenEmptyFields = _controller.Update(updateUserDtoWhenEmptyFields);
+
+            var resultWhenInvalidFields = _controller.Update(updateUserDtoWhenInvalidFields);
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(resultWhenEmptyFields);
+            Assert.Equal(400, (resultWhenEmptyFields.Result as ObjectResult)?.StatusCode);
+
+            Assert.IsType<Task<ActionResult>>(resultWhenInvalidFields);
+            Assert.Equal(400, (resultWhenInvalidFields.Result as ObjectResult)?.StatusCode);
+        }
+
+        [Fact]
+        public void Update_WithInvalidInput_ReturnsErrorResponse()
+        {
+            // Arrange
+            UserDto? userDto = null!;
+            _mockUserService.Setup(service => service.Get(It.IsAny<string>()))
+                .ReturnsAsync(userDto);
+
+            // Act
+            var result = _controller.Update(new UpdateUserDto() { });
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
+            var jsonAsString1 = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":false", jsonAsString1);
+            Assert.Contains("\"Message\":\"An error occurred during processing, user not found.\"", jsonAsString1);
+        }
+
+        [Fact]
+        public void Update_WithValidInput_ReturnsActionResult()
+        {
+            // Arrange
+            _mockUserService.Setup(service => service.Get(It.IsAny<string>()))
+                .ReturnsAsync(new UserDto() { });
+
+            _mockUserService.Setup(service => service.Update(new UpdateUserDto() { }))
+                .ReturnsAsync(new UserDto() { });
+
+            // Act
+            var result = _controller.Update(new UpdateUserDto() { });
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"NewStatus\":true", jsonAsString);
+            Assert.Contains("Data", jsonAsString);
+
+            var userDto = JsonConvert.DeserializeObject<UserDto>(jsonAsString);
+            Assert.IsType<UserDto>(userDto);
+            Assert.NotNull(userDto);
+        }
         #endregion
 
         #region Delete
@@ -377,6 +450,10 @@ namespace ReadingClub.UnitTests.Controllers
         [Fact]
         public void Delete_ShouldHave_HttpDeleteAction() =>
             Assert.True(TestHelper.IsAttributePresent(_controller, "Delete", typeof(HttpDeleteAttribute)));
+        
+        
+        
+        
         #endregion
 
         #region GetLoggedUser
