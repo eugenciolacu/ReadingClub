@@ -1,12 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ReadingClub.Controllers;
+using ReadingClub.Infrastructure.DTO.Book;
 using ReadingClub.Infrastructure.DTO.User;
 using ReadingClub.Services.Interfaces;
+using System.Security.Claims;
 
 namespace ReadingClub.UnitTests.Controllers
 {
@@ -110,14 +114,17 @@ namespace ReadingClub.UnitTests.Controllers
             var result3 = _controller.Create(new CreateUserDto() { });
 
             // Assert
+            Assert.IsType<Task<ActionResult>>(result1);
             var jsonAsString1 = JsonConvert.SerializeObject(result1.Result);
             Assert.Contains("\"Status\":false", jsonAsString1);
             Assert.Contains("\"Message\":\"This user name already exists.\"", jsonAsString1);
 
+            Assert.IsType<Task<ActionResult>>(result2);
             var jsonAsString2 = JsonConvert.SerializeObject(result2.Result);
             Assert.Contains("\"Status\":false", jsonAsString2);
             Assert.Contains("\"Message\":\"This email already exists.\"", jsonAsString2);
 
+            Assert.IsType<Task<ActionResult>>(result3);
             var jsonAsString3 = JsonConvert.SerializeObject(result3.Result);
             Assert.Contains("\"Status\":false", jsonAsString3);
             Assert.Contains("\"Message\":\"This user name and emai already exists.\"", jsonAsString3);
@@ -213,6 +220,7 @@ namespace ReadingClub.UnitTests.Controllers
             var result = _controller.Login(new UserLoginDto() { });
 
             // Assert
+            Assert.IsType<Task<ActionResult>>(result);
             var jsonAsString = JsonConvert.SerializeObject(result.Result);
             Assert.Contains("\"Status\":false", jsonAsString);
             Assert.Contains("\"Message\":\"User do not exists or password is incorrect.\"", jsonAsString);
@@ -228,15 +236,14 @@ namespace ReadingClub.UnitTests.Controllers
         [Fact]
         public void IsTokenValid_ShouldHave_HttpPostAction() =>
             Assert.True(TestHelper.IsAttributePresent(_controller, "IsTokenValid", typeof(HttpPostAttribute)));
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+        [Fact]
+        public void IsTokenValid()
+        {
+            // not implemented
+
+
+        }
         #endregion
 
         #region Get
@@ -247,6 +254,105 @@ namespace ReadingClub.UnitTests.Controllers
         [Fact]
         public void Get_ShouldHave_HttpPostAction() =>
             Assert.True(TestHelper.IsAttributePresent(_controller, "Get", typeof(HttpPostAttribute)));
+
+        [Fact]
+        public void Get_ClaimsIdentityNullEmail_ReturnsErrorResponse()
+        {
+            // Arrange
+            var claimsIdentity = new ClaimsIdentity();
+
+            var mockHttpContext = new Mock<HttpContext>();
+            mockHttpContext.SetupGet(context => context.User.Identity)
+                .Returns(claimsIdentity);
+
+            var controller = new UserController(_mockUserService.Object, _mockConfiguration.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object }
+            };
+
+            // Act
+            var result = controller.Get();
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":false", jsonAsString);
+            Assert.Contains("\"Message\":\"An error occurred during processing, user not found.\"", jsonAsString);
+        }
+
+        [Fact]
+        public void Get_ValidClaimsIdentityInvalidEmail_ReturnsErrorResponse()
+        {
+            // Arrange
+            var claimsIdentity = new ClaimsIdentity(
+                new Claim[]
+                {
+                    new Claim(ClaimTypes.Email, "someValidEmail@gmail.com")
+                }
+            );
+
+            var mockHttpContext = new Mock<HttpContext>();
+            mockHttpContext.SetupGet(context => context.User.Identity)
+                .Returns(claimsIdentity);
+
+            UserDto? userDto = null;
+
+            _mockUserService.Setup(service => service.Get(It.IsAny<string?>()!))!
+                .ReturnsAsync(userDto);
+
+            var controller = new UserController(_mockUserService.Object, _mockConfiguration.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object }
+            };
+
+            // Act
+            var result = controller.Get();
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":false", jsonAsString);
+            Assert.Contains("\"Message\":\"An error occurred during processing, user not found.\"", jsonAsString);
+        }
+
+        [Fact]
+        public void Get_ValidClaimsIdentityValidEmail_ReturnsActionResult()
+        {
+            // Arrange
+            var claimsIdentity = new ClaimsIdentity(
+                new Claim[]
+                {
+                    new Claim(ClaimTypes.Email, "someValidEmail@gmail.com")
+                }
+            );
+
+            var mockHttpContext = new Mock<HttpContext>();
+            mockHttpContext.SetupGet(context => context.User.Identity)
+                .Returns(claimsIdentity);
+
+            _mockUserService.Setup(service => service.Get(It.IsAny<string?>()!))!
+                .ReturnsAsync(new UserDto() { });
+
+            var controller = new UserController(_mockUserService.Object, _mockConfiguration.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object }
+            };
+
+            // Act
+            var result = controller.Get();
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":true", jsonAsString);
+            Assert.Contains("Data", jsonAsString);
+
+            var userDto = JsonConvert.DeserializeObject<UserDto>(jsonAsString);
+            Assert.IsType<UserDto>(userDto);
+            Assert.NotNull(userDto);
+        }
         #endregion
 
         #region Update
@@ -257,6 +363,10 @@ namespace ReadingClub.UnitTests.Controllers
         [Fact]
         public void Update_ShouldHave_HttpPutAction() =>
             Assert.True(TestHelper.IsAttributePresent(_controller, "Update", typeof(HttpPutAttribute)));
+        
+        
+        
+        
         #endregion
 
         #region Delete

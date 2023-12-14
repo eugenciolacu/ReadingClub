@@ -312,6 +312,8 @@ namespace ReadingClub.UnitTests.Controllers
             var result = _controller.Update(updateBookDto);
 
             // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
             var jsonAsString = JsonConvert.SerializeObject(result.Result);
             Assert.Contains("\"Status\":false", jsonAsString);
             Assert.Contains("\"Message\":\"An error occurred during processing, book not found.\"", jsonAsString);
@@ -363,6 +365,8 @@ namespace ReadingClub.UnitTests.Controllers
             var result = _controller.Delete(1);
 
             // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
             var jsonAsString = JsonConvert.SerializeObject(result.Result);
             Assert.Contains("\"Status\":false", jsonAsString);
             Assert.Contains("\"Message\":\"An error occurred during processing, book not found.\"", jsonAsString);
@@ -474,6 +478,7 @@ namespace ReadingClub.UnitTests.Controllers
 
             // Assert
             var jsonAsString = JsonConvert.SerializeObject(result.Result);
+
             Assert.Contains("\"Status\":true", jsonAsString);
             Assert.Contains("Data", jsonAsString);
 
@@ -501,6 +506,8 @@ namespace ReadingClub.UnitTests.Controllers
             var result = _controller.GetBookForDownload(new BookToStringFileDto() { });
 
             // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
             var jsonAsString = JsonConvert.SerializeObject(result.Result);
             Assert.Contains("\"Status\":false", jsonAsString);
             Assert.Contains("\"Message\":\"An error occurred during processing, book not found.\"", jsonAsString);
