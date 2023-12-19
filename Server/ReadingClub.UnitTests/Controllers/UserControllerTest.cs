@@ -1,15 +1,22 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ReadingClub.Controllers;
-using ReadingClub.Infrastructure.DTO.Book;
 using ReadingClub.Infrastructure.DTO.User;
 using ReadingClub.Services.Interfaces;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
+using System.Text;
 
 namespace ReadingClub.UnitTests.Controllers
 {
@@ -237,11 +244,143 @@ namespace ReadingClub.UnitTests.Controllers
             Assert.True(TestHelper.IsAttributePresent(_controller, "IsTokenValid", typeof(HttpPostAttribute)));
 
         [Fact]
-        public void IsTokenValid()
+        public void IsTokenValid_InvalidTokenResultingInNullUserDto_ReturnsErrorMessage()
         {
-            // not implemented
+            // Arrange
+            UserDto userDto = new UserDto()
+            {
+                UserName = "",
+                Email = ""
+            };
 
+            string? tokenDto = GenerateToken(userDto);
 
+            _mockUserService.Setup(service => service.Get(It.IsAny<string>()))
+                .ReturnsAsync((UserDto)null!);
+
+            // Act
+            var result = _controller.IsTokenValid(new TokenDto() { Token = tokenDto });
+
+            // Assert
+            Assert.IsType<Task<IActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":false", jsonAsString);
+            Assert.Contains("\"Message\":\"Token validation failed, user not found.\"", jsonAsString);
+        }
+
+        [Fact]
+        public void IsTokenValid_ValidToken_ReturnsTheSameToken()
+        {
+            // Arrange
+            UserDto userDto = new UserDto()
+            {
+                UserName = "someValidUser",
+                Email = "someValidEmail@gmail.com"
+            };
+
+            string? token = GenerateToken(userDto);
+
+            _mockUserService.Setup(service => service.Get(It.IsAny<string>()))
+                .ReturnsAsync(userDto);
+
+            // Act
+            var result = _controller.IsTokenValid(new TokenDto() { Token = token });
+
+            // Assert
+            Assert.IsType<Task<IActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":true", jsonAsString);
+            Assert.Contains("Data", jsonAsString);
+
+            Assert.Contains($"\"Data\":\"{token}\"", jsonAsString);
+        }
+
+        [Fact]
+        public void IsTokenValid_TokenExpiredLesstTanAdayAgo_ReturnsNewToken()
+        {
+            // Arrange
+            UserDto userDto = new UserDto()
+            {
+                UserName = "someValidUser",
+                Email = "someValidEmail@gmail.com"
+            };
+
+            string? token = GenerateTokenThithExpirationOfLessThanADay(userDto);
+
+            _mockUserService.Setup(service => service.Get(It.IsAny<string>()))
+                .ReturnsAsync(userDto);
+
+            // Act
+            var result = _controller.IsTokenValid(new TokenDto() { Token = token });
+
+            // Assert
+            Assert.IsType<Task<IActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":true", jsonAsString);
+            Assert.Contains("Data", jsonAsString);
+
+            var data = (string) JsonConvert.DeserializeObject<dynamic>(jsonAsString)!["Value"]["Data"];
+            Assert.NotNull(data);
+            data = data.Replace("{", "");
+            data = data.Replace("}", "");
+
+            var repeatetedToken = GenerateToken(userDto);
+            Assert.Equal(repeatetedToken, data);
+        }
+
+        [Fact]
+        public void IsTokenValid_TokenExpiredMoreThanAdayAgo_ReturnsErrorMessage()
+        {
+            // Arrange
+            UserDto userDto = new UserDto()
+            {
+                UserName = "someValidUser",
+                Email = "someValidEmail@gmail.com"
+            };
+
+            string? token = GenerateTokenThithExpirationOfMoreThanADay(userDto);
+
+            _mockUserService.Setup(service => service.Get(It.IsAny<string>()))
+                .ReturnsAsync(userDto);
+
+            // Act
+            var result = _controller.IsTokenValid(new TokenDto() { Token = token });
+
+            // Assert
+            Assert.IsType<Task<IActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":false", jsonAsString);
+            Assert.Contains("\"Message\":\"Token validation failed.\"", jsonAsString);
+        }
+
+        [Fact]
+        public void IsTokenValid_ThrowsErrorDuringTokenValidation_ReturnsErrorMessage()
+        {
+            // Arrange
+            UserDto userDto = new UserDto()
+            {
+                UserName = "someValidUser",
+                Email = "someValidEmail@gmail.com"
+            };
+
+            string? token = GenerateWrongToken(userDto);
+
+            _mockUserService.Setup(service => service.Get(It.IsAny<string>()))
+                .ReturnsAsync(userDto);
+
+            // Act
+            var result = _controller.IsTokenValid(new TokenDto() { Token = token });
+
+            // Assert
+            Assert.IsType<Task<IActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":false", jsonAsString);
+            Assert.Contains("\"Message\":\"Token validation failed.\"", jsonAsString);
         }
         #endregion
 
@@ -274,6 +413,7 @@ namespace ReadingClub.UnitTests.Controllers
 
             // Assert
             Assert.IsType<Task<ActionResult>>(result);
+
             var jsonAsString = JsonConvert.SerializeObject(result.Result);
             Assert.Contains("\"Status\":false", jsonAsString);
             Assert.Contains("\"Message\":\"An error occurred during processing, user not found.\"", jsonAsString);
@@ -450,10 +590,98 @@ namespace ReadingClub.UnitTests.Controllers
         [Fact]
         public void Delete_ShouldHave_HttpDeleteAction() =>
             Assert.True(TestHelper.IsAttributePresent(_controller, "Delete", typeof(HttpDeleteAttribute)));
-        
-        
-        
-        
+
+        [Fact]
+        public void Delete_WithInvalidInput_ReturnsErrorResponse()
+        {
+            // Arrange
+            var claimsIdentity = new ClaimsIdentity();
+
+            var mockHttpContext = new Mock<HttpContext>();
+            mockHttpContext.SetupGet(context => context.User.Identity)
+                .Returns(claimsIdentity);
+
+            var controller = new UserController(_mockUserService.Object, _mockConfiguration.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object }
+            };
+
+            // Act
+            var result = controller.Delete();
+            
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":false", jsonAsString);
+            Assert.Contains("\"Message\":\"An error occurred during processing, user not found.\"", jsonAsString);
+        }
+
+        [Fact]
+        public void Delete_WithValidInput_ReturnsActionResult()
+        {
+            // Arrange
+            var claimsIdentity = new ClaimsIdentity(
+                new Claim[]
+                {
+                    new Claim(ClaimTypes.Email, "someValidEmail@gmail.com")
+                }
+            );
+
+            var mockHttpContext = new Mock<HttpContext>();
+            mockHttpContext.SetupGet(context => context.User.Identity)
+                .Returns(claimsIdentity);
+
+            _mockUserService.Setup(service => service.Delete(It.IsAny<string>()));
+
+            var controller = new UserController(_mockUserService.Object, _mockConfiguration.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object }
+            };
+
+            // Act
+            var result = controller.Delete();
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":true", jsonAsString);
+        }
+
+        [Fact]
+        public void Delete_UserServiceDeleteThrowsError_ReturnsErrorResponse()
+        {
+            // Arrange
+            var claimsIdentity = new ClaimsIdentity(
+                new Claim[]
+                {
+                    new Claim(ClaimTypes.Email, "someValidEmail@gmail.com")
+                }
+            );
+
+            var mockHttpContext = new Mock<HttpContext>();
+            mockHttpContext.SetupGet(context => context.User.Identity)
+                .Returns(claimsIdentity);
+
+            _mockUserService.Setup(service => service.Delete(It.IsAny<string>()))
+                .Throws(new Exception());
+
+            var controller = new UserController(_mockUserService.Object, _mockConfiguration.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object }
+            };
+
+            // Act
+            var result = controller.Delete();
+
+            // Assert
+            Assert.IsType<Task<ActionResult>>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result.Result);
+            Assert.Contains("\"Status\":false", jsonAsString);
+            Assert.Contains("\"Message\":\"An error occurred during processing, cannot remove user.\"", jsonAsString);
+        }
         #endregion
 
         #region GetLoggedUser
@@ -464,6 +692,129 @@ namespace ReadingClub.UnitTests.Controllers
         [Fact]
         public void GetLoggedUser_ShouldHave_HttpPostAction() =>
             Assert.True(TestHelper.IsAttributePresent(_controller, "GetLoggedUser", typeof(HttpPostAttribute)));
+
+        [Fact]
+        public void GetLoggedUser_ReturnsLoggetUser()
+        {
+            // Arrange
+            var claimsIdentity = new ClaimsIdentity(
+                new Claim[]
+                {
+                    new Claim(ClaimTypes.Email, "someValidEmail@gmail.com"),
+                    new Claim(ClaimTypes.Name, "someName")
+                }
+            );
+
+            var mockHttpContext = new Mock<HttpContext>();
+            mockHttpContext.SetupGet(context => context.User.Identity)
+                .Returns(claimsIdentity);
+
+            var controller = new UserController(_mockUserService.Object, _mockConfiguration.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object }
+            };
+
+            // Act
+            var result = controller.GetLoggedUser();
+
+            // Assert
+            Assert.IsAssignableFrom<ActionResult>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result);
+            Assert.Contains("\"Status\":true", jsonAsString);
+            Assert.Contains("Data", jsonAsString);
+
+            var data = JsonConvert.DeserializeObject<dynamic>(jsonAsString)!["Value"]["Data"];
+            Assert.NotNull(data);
+        }
+
+        [Fact]
+        public void GetLoggedUser_ReturnsErrorResponse()
+        {
+            // Arrange
+            var claimsIdentity = new ClaimsIdentity();
+
+            var mockHttpContext = new Mock<HttpContext>();
+            mockHttpContext.SetupGet(context => context.User.Identity)
+                .Returns(claimsIdentity);
+
+            var controller = new UserController(_mockUserService.Object, _mockConfiguration.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object }
+            };
+
+            // Act
+            var result = controller.GetLoggedUser();
+
+            // Assert
+            Assert.IsAssignableFrom<ActionResult>(result);
+
+            var jsonAsString = JsonConvert.SerializeObject(result);
+            Assert.Contains("\"Status\":false", jsonAsString);
+            Assert.Contains("\"Message\":\"An error occurred during processing, user not found.\"", jsonAsString);
+        }
         #endregion
+
+        private string GenerateToken(UserDto userDto)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_mockConfiguration.Object["Jwt:Key"]!));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Name, userDto.UserName),
+                new Claim(ClaimTypes.Email, userDto.Email)
+            };
+            var token = new JwtSecurityToken(_mockConfiguration.Object["Jwt:Issuer"],
+                _mockConfiguration.Object["Jwt:Audience"],
+                claims,
+                expires: DateTime.Now.AddMinutes(1),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private string GenerateTokenThithExpirationOfLessThanADay(UserDto userDto)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_mockConfiguration.Object["Jwt:Key"]!));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Name, userDto.UserName),
+                new Claim(ClaimTypes.Email, userDto.Email)
+            };
+            var token = new JwtSecurityToken(_mockConfiguration.Object["Jwt:Issuer"],
+                _mockConfiguration.Object["Jwt:Audience"],
+                claims,
+                expires: DateTime.Now.AddMinutes(-10),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private string GenerateTokenThithExpirationOfMoreThanADay(UserDto userDto)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_mockConfiguration.Object["Jwt:Key"]!));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Name, userDto.UserName),
+                new Claim(ClaimTypes.Email, userDto.Email)
+            };
+            var token = new JwtSecurityToken(_mockConfiguration.Object["Jwt:Issuer"],
+                _mockConfiguration.Object["Jwt:Audience"],
+                claims,
+                expires: DateTime.Now.AddDays(-1.1),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private string GenerateWrongToken(UserDto userDto)
+        {           
+            var token = new JwtSecurityToken();
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
     }
 }
+
