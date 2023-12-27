@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using ReadingClub.Domain;
 using ReadingClub.Domain.Alternative;
+using ReadingClub.Infrastructure.Common.Paging;
 using ReadingClub.Infrastructure.DTO.Book;
 using ReadingClub.Infrastructure.Profile;
 using ReadingClub.Repositories.Interfaces;
@@ -84,6 +85,21 @@ namespace ReadingClub.UnitTests.Services.Implementations
             "REH/2Q==";
         private readonly string _fileAsBase64Meme = "data:@file/jpeg;base64";
 
+        private readonly PagedRequest _validPagedRequest = new PagedRequest()
+        {
+            PageSize = 5,
+            Page = 1,
+            OrderBy = "Title",
+            OrderDirection = "ASC",
+            Filters = new Dictionary<string, string>()
+                {
+                    { "title", "Some titele" },
+                    { "authors", "Some Authors" },
+                    { "isbn", "111-2-33-444444-5" }
+                },
+            UserEmail = "test@test.com"
+        };
+
         public BookServiceTest() 
         {
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(new BookProfile()));
@@ -157,7 +173,7 @@ namespace ReadingClub.UnitTests.Services.Implementations
             var result = _bookService.Create( createBookDto );
 
             // Assert
-            Assert.IsType<BookDto>(result.Result);
+            Assert.IsType<Task<BookDto>>(result);
             Assert.NotNull(result.Result);
             Assert.Equal(1, result.Result.Id);
             Assert.Equal("Some Title", result.Result.Title);
@@ -217,7 +233,7 @@ namespace ReadingClub.UnitTests.Services.Implementations
             var result = _bookService.Delete(234);
 
             // Assert
-            Assert.IsType<BookDto>(result.Result);
+            Assert.IsType<Task<BookDto>>(result);
             Assert.NotNull(result.Result);
             Assert.Equal(anonymousUser, result.Result.AddedByUserName);
             Assert.Equal(book.AddedBy, addedBy);
@@ -254,14 +270,60 @@ namespace ReadingClub.UnitTests.Services.Implementations
             var result = _bookService.Get(123);
 
             // Assert
-            Assert.IsType<BookDto>(result.Result);
+            Assert.IsType<Task<BookDto>>(result);
             Assert.NotNull(result.Result);
         }
-
         #endregion
 
         #region GetPagedAdminPage
+        [Fact]
+        public void GetPagedAdminPage_WithValidInput_ReturnsPagedResponse()
+        {
+            // Arrange
+            _mockBookRepository.Setup(repo => repo.GetPagedAdminPage(It.IsAny<PagedRequest>()))
+                .ReturnsAsync(new PagedResponse<BookExtra>(
+                    new List<BookExtra>()
+                    {
+                        new BookExtra()
+                        {
+                            Id = 1234,
+                            Title = "Some Title",
+                            Authors = "Some Authors",
+                            ISBN = "111-2-33-444444-5",
+                            Description = "Some description",
+                            Cover = Convert.FromBase64String(_fileAsBase64WithoutMeme),
+                            CoverName = "Test cover",
+                            CoverMime = _fileAsBase64Meme,
+                            File = Convert.FromBase64String(_fileAsBase64WithoutMeme),
+                            FileName = "Test file",
+                            AddedBy = 123,
+                            AddedByUserName = "Some user name",
+                            IsInReadingList = false,
+                            IsRead = false,
+                        }
+                    },
+                    1
+                ));
 
+            // Act
+            var result = _bookService.GetPagedAdminPage(_validPagedRequest);
+
+            // Assert
+            Assert.IsType<Task<PagedResponse<BookDto>>>(result);
+            Assert.NotNull(result.Result);
+            Assert.Equal(1234, result.Result.Items[0].Id);
+            Assert.Equal("Some Title", result.Result.Items[0].Title);
+            Assert.Equal("Some Authors", result.Result.Items[0].Authors);
+            Assert.Equal("111-2-33-444444-5", result.Result.Items[0].ISBN);
+            Assert.Equal("Some description", result.Result.Items[0].Description);
+            Assert.Equal(_fileAsBase64WithoutMeme, result.Result.Items[0].Cover);
+            Assert.Equal("Test cover", result.Result.Items[0].CoverName);
+            Assert.Equal(_fileAsBase64Meme, result.Result.Items[0].CoverMime);
+            Assert.Equal("Test file", result.Result.Items[0].FileName);
+            Assert.Equal("Some user name", result.Result.Items[0].AddedByUserName);
+            Assert.False(result.Result.Items[0].IsInReadingList);
+            Assert.False(result.Result.Items[0].IsRead);
+        }
         #endregion
 
         #region GetPagedSearchPage
