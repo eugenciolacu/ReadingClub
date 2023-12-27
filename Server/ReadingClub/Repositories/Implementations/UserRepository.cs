@@ -121,16 +121,36 @@ namespace ReadingClub.Repositories.Implementations
 
         public async Task<int> GetUserIdByEmail(string email)
         {
-            using (var connection = new SqliteConnection(_connectionString))
-            {
-                var sqlQuery =
+            var id = 0;
+            var count = 0;
+
+            var sqlQuery =
                     $@"SELECT id
                     FROM users
-                    WHERE email = @email";
-                var queryResult = await connection.ExecuteScalarAsync<int>(sqlQuery, new { email });
+                    WHERE email = '{email}';
 
-                return queryResult;
+                    SELECT COUNT(*)
+                    FROM users
+                    WHERE email = '{email}';";
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                using (var multi = await connection.QueryMultipleAsync(sqlQuery))
+                {
+                    var idByUserEmail = await multi.ReadAsync<int>();
+                    var countByUserEmail = await multi.ReadAsync<int>();
+
+                    id = idByUserEmail.FirstOrDefault();
+                    count = countByUserEmail.FirstOrDefault();
+                }
             }
+
+            if (count == 1)
+            {
+                return id;
+            }
+
+            throw new Exception("User id not found, Email do not found.");
         }
     }
 }
