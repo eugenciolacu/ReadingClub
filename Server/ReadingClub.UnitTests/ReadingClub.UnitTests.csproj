@@ -26,7 +26,6 @@
   <ItemGroup>
     <Folder Include="Infrastructure\Common\Helpers\" />
     <Folder Include="Repositories\Implementations\" />
-    <Folder Include="Services\Implementations\" />
   </ItemGroup>
 
   <ItemGroup>

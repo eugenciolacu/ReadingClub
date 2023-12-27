@@ -7,7 +7,7 @@ namespace ReadingClub.UnitTests.Infrastructure.Profile
 {
     public class UserProfileTest
     {
-        private readonly Mapper _mapper;
+        private readonly IMapper _mapper;
         public UserProfileTest() 
         {
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(new UserProfile()));
