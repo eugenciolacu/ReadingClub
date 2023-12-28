@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
 using Moq;
 using ReadingClub.Domain;
 using ReadingClub.Domain.Alternative;
@@ -327,35 +326,296 @@ namespace ReadingClub.UnitTests.Services.Implementations
         #endregion
 
         #region GetPagedSearchPage
+        [Fact]
+        public void GetPagedSearchPage_WithValidInput_ReturnsPagedResponse()
+        {
+            // Arrange
+            _mockBookRepository.Setup(repo => repo.GetPagedSearchPage(It.IsAny<PagedRequest>()))
+                .ReturnsAsync(new PagedResponse<BookExtra>(
+                    new List<BookExtra>()
+                    {
+                        new BookExtra()
+                        {
+                            Id = 1234,
+                            Title = "Some Title",
+                            Authors = "Some Authors",
+                            ISBN = "111-2-33-444444-5",
+                            Description = "Some description",
+                            Cover = Convert.FromBase64String(_fileAsBase64WithoutMeme),
+                            CoverName = "Test cover",
+                            CoverMime = _fileAsBase64Meme,
+                            File = Convert.FromBase64String(_fileAsBase64WithoutMeme),
+                            FileName = "Test file",
+                            AddedBy = 123,
+                            AddedByUserName = "Some user name",
+                            IsInReadingList = false,
+                            IsRead = false,
+                        }
+                    },
+                    1
+                ));
 
+            // Act
+            var result = _bookService.GetPagedSearchPage(_validPagedRequest);
+
+            // Assert
+            Assert.IsType<Task<PagedResponse<BookDto>>>(result);
+            Assert.NotNull(result.Result);
+            Assert.Equal(1234, result.Result.Items[0].Id);
+            Assert.Equal("Some Title", result.Result.Items[0].Title);
+            Assert.Equal("Some Authors", result.Result.Items[0].Authors);
+            Assert.Equal("111-2-33-444444-5", result.Result.Items[0].ISBN);
+            Assert.Equal("Some description", result.Result.Items[0].Description);
+            Assert.Equal(_fileAsBase64WithoutMeme, result.Result.Items[0].Cover);
+            Assert.Equal("Test cover", result.Result.Items[0].CoverName);
+            Assert.Equal(_fileAsBase64Meme, result.Result.Items[0].CoverMime);
+            Assert.Equal("Test file", result.Result.Items[0].FileName);
+            Assert.Equal("Some user name", result.Result.Items[0].AddedByUserName);
+            Assert.False(result.Result.Items[0].IsInReadingList);
+            Assert.False(result.Result.Items[0].IsRead);
+        }
         #endregion
 
         #region GetPagedReadingListPage
+        [Fact]
+        public void GetPagedReadingListPage_WithValidInput_ReturnsPagedResponse()
+        {
+            // Arrange
+            _mockBookRepository.Setup(repo => repo.GetPagedReadingListPage(It.IsAny<PagedRequest>()))
+                .ReturnsAsync(new PagedResponse<BookExtra>(
+                    new List<BookExtra>()
+                    {
+                        new BookExtra()
+                        {
+                            Id = 1234,
+                            Title = "Some Title",
+                            Authors = "Some Authors",
+                            ISBN = "111-2-33-444444-5",
+                            Description = "Some description",
+                            Cover = Convert.FromBase64String(_fileAsBase64WithoutMeme),
+                            CoverName = "Test cover",
+                            CoverMime = _fileAsBase64Meme,
+                            File = Convert.FromBase64String(_fileAsBase64WithoutMeme),
+                            FileName = "Test file",
+                            AddedBy = 123,
+                            AddedByUserName = "Some user name",
+                            IsInReadingList = false,
+                            IsRead = false,
+                        }
+                    },
+                    1
+                ));
 
+            // Act
+            var result = _bookService.GetPagedReadingListPage(_validPagedRequest);
+
+            // Assert
+            Assert.IsType<Task<PagedResponse<BookDto>>>(result);
+            Assert.NotNull(result.Result);
+            Assert.Equal(1234, result.Result.Items[0].Id);
+            Assert.Equal("Some Title", result.Result.Items[0].Title);
+            Assert.Equal("Some Authors", result.Result.Items[0].Authors);
+            Assert.Equal("111-2-33-444444-5", result.Result.Items[0].ISBN);
+            Assert.Equal("Some description", result.Result.Items[0].Description);
+            Assert.Equal(_fileAsBase64WithoutMeme, result.Result.Items[0].Cover);
+            Assert.Equal("Test cover", result.Result.Items[0].CoverName);
+            Assert.Equal(_fileAsBase64Meme, result.Result.Items[0].CoverMime);
+            Assert.Equal("Test file", result.Result.Items[0].FileName);
+            Assert.Equal("Some user name", result.Result.Items[0].AddedByUserName);
+            Assert.False(result.Result.Items[0].IsInReadingList);
+            Assert.False(result.Result.Items[0].IsRead);
+        }
         #endregion
 
         #region Update
+        [Fact]
+        public void Update_WithValidInput_ReturnsBookDto()
+        {
+            // Arrange
+            var updatedFileAsBase64WithMeme = "/someUpdates" + _fileAsBase64WithMeme;
+            var updatedFileAsBase64WithoutMeme = "/someUpdates" + _fileAsBase64WithoutMeme;
 
+            var updateBookDto = new UpdateBookDto()
+            {
+                Id = 123,
+                Title = "Updated Title",
+                Authors = "Update Authors",
+                ISBN = "5-4-33-222222-1",
+                Description = "Updated description",
+                Cover = updatedFileAsBase64WithMeme,
+                CoverName = "Updated cover",
+                IsCoverEdited = true,
+                File = updatedFileAsBase64WithMeme,
+                FileName = "Updated file",
+                IsFileEdited = true
+            };
+            
+            _mockBookRepository.Setup(repo => repo.Update(It.IsAny<Book>(), It.IsAny<bool>(), It.IsAny<bool>()))
+                .ReturnsAsync(new Book()
+                {
+                    Id = 123,
+                    Title = "Updated Title",
+                    Authors = "Updated Authors",
+                    ISBN = "5-4-33-222222-1",
+                    Description = "Updated description",
+                    Cover = Convert.FromBase64String(updatedFileAsBase64WithoutMeme),
+                    CoverName = "Updated cover",
+                    CoverMime = _fileAsBase64Meme,
+                    File = Convert.FromBase64String(updatedFileAsBase64WithoutMeme),
+                    FileName = "Updated file",
+                    AddedBy = 1234
+                });
+            _mockBookRepository.Setup(repo => repo.GetExtra(It.IsAny<int>()))
+                .ReturnsAsync(new BookExtra()
+                {
+                    Id = 123,
+                    Title = "Updated Title",
+                    Authors = "Updated Authors",
+                    ISBN = "5-4-33-222222-1",
+                    Description = "Updated description",
+                    Cover = Convert.FromBase64String(updatedFileAsBase64WithoutMeme),
+                    CoverName = "Updated cover",
+                    CoverMime = _fileAsBase64Meme,
+                    File = Convert.FromBase64String(updatedFileAsBase64WithoutMeme),
+                    FileName = "Updated file",
+                    AddedBy = 1234,
+                    AddedByUserName = "someUsernameCorespondingToUserId=1234",
+                    IsInReadingList = false,
+                    IsRead = false
+                });
+
+            // Act
+            var result = _bookService.Update(updateBookDto);
+
+            // Assert
+            Assert.IsType<Task<BookDto>>(result);
+            Assert.NotNull(result.Result);
+            Assert.Equal(123, result.Result.Id);
+            Assert.Equal("Updated Title", result.Result.Title);
+            Assert.Equal("Updated Authors", result.Result.Authors);
+            Assert.Equal("5-4-33-222222-1", result.Result.ISBN);
+            Assert.Equal("Updated description", result.Result.Description);
+            Assert.Equal(updatedFileAsBase64WithoutMeme, result.Result.Cover);
+            Assert.Equal("Updated cover", result.Result.CoverName);
+            Assert.Equal(_fileAsBase64Meme, result.Result.CoverMime);
+            Assert.Equal("Updated file", result.Result.FileName);
+            Assert.Equal("someUsernameCorespondingToUserId=1234", result.Result.AddedByUserName);
+            Assert.False(result.Result.IsInReadingList);
+            Assert.False(result.Result.IsRead);
+        }
         #endregion
 
         #region AddToReadingList
+        [Fact]
+        public void AddToReadingList_WithValidInput_ReturnsVoid()
+        {
+            // Arrange
+            var bookToReadingListDto = new BookToReadingListDto(
+                userEmail: "test@test.com",
+                bookId: 123,
+                isRead: false
+            );
 
+            //_mockBookRepository.Setup(repo => repo.AddToReadingList(It.IsAny<BookToReadingListDto>()));
+
+            // Act
+            var result = _bookService.AddToReadingList(bookToReadingListDto);
+
+            // Assert           
+            _mockBookRepository.Verify(repo => repo.AddToReadingList(It.IsAny<BookToReadingListDto>()), Times.Once);
+        }
         #endregion
 
         #region RemoveFromReadingList
+        [Fact]
+        public void RemoveFromReadingList_WithValidInput_ReturnsVoid()
+        {
+            // Arrange
+            var bookToReadingListDto = new BookToReadingListDto(
+                userEmail: "test@test.com",
+                bookId: 123,
+                isRead: false
+            );
 
+            //_mockBookRepository.Setup(repo => repo.RemoveFromReadingList(It.IsAny<BookToReadingListDto>()));
+
+            // Act
+            var result = _bookService.RemoveFromReadingList(bookToReadingListDto);
+
+            // Assert           
+            _mockBookRepository.Verify(repo => repo.RemoveFromReadingList(It.IsAny<BookToReadingListDto>()), Times.Once);
+        }
         #endregion
 
         #region MarkAsReadOrUnread
+        [Fact]
+        public void MarkAsReadOrUnread_WithValidInput_ReturnsVoid()
+        {
+            // Arrange
+            var bookToReadingListDto = new BookToReadingListDto(
+                userEmail: "test@test.com",
+                bookId: 123,
+                isRead: true
+            );
 
+            //_mockBookRepository.Setup(repo => repo.MarkAsReadOrUnread(It.IsAny<BookToReadingListDto>()));
+
+            // Act
+            var result = _bookService.MarkAsReadOrUnread(bookToReadingListDto);
+
+            // Assert           
+            _mockBookRepository.Verify(repo => repo.MarkAsReadOrUnread(It.IsAny<BookToReadingListDto>()), Times.Once);
+        }
         #endregion
 
         #region GetStatistics
+        [Fact]
+        public void GetStatistics_WithValidInput_ReturnsBookStatisticsDto()
+        {
+            // Arrange
+            _mockBookRepository.Setup(repo => repo.GetStatistics(It.IsAny<string>()))
+                .ReturnsAsync(new BookStatisticsDto());
 
+            // Act
+            var result = _bookService.GetStatistics("test@test.com");
+
+            // Assert
+            Assert.IsType<Task<BookStatisticsDto>>(result);
+            Assert.NotNull(result.Result);
+        }
         #endregion
 
         #region GetBookForDowload
+        [Fact]
+        public void GetBookForDownload_WithInvalidInput_ReturnsNull()
+        {
+            // Arrange
+            _mockBookRepository.Setup(repo => repo.GetBookForDownload(It.IsAny<int>()))
+                .ReturnsAsync((byte[]) null!);
 
+            // Act
+            var result = _bookService.GetBookForDownload(123);
+
+            // Assert
+            Assert.IsType<Task<string>>(result);
+            Assert.Null(result.Result);
+        }
+
+        [Fact]
+        public void GetBookForDownload_WithValidInput_ReturnsBase64String()
+        {
+            // Arrange
+            _mockBookRepository.Setup(repo => repo.GetBookForDownload(It.IsAny<int>()))
+                .ReturnsAsync(Convert.FromBase64String(_fileAsBase64WithoutMeme));
+
+            // Act
+            var result = _bookService.GetBookForDownload(123);
+
+            // Assert
+            Assert.IsType<Task<string>>(result);
+            Assert.NotNull(result.Result);
+            Assert.Equal(_fileAsBase64WithoutMeme, result.Result);
+        }
         #endregion
     }
 }
