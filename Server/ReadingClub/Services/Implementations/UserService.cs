@@ -70,7 +70,7 @@ namespace ReadingClub.Services.Implementations
 
                 if (hashedPassword != loggedUser.Password)
                 {
-                    return null;
+                    return null!;
                 }
             }
 
