@@ -204,7 +204,41 @@ namespace ReadingClub.UnitTests.Services.Implementations
         #endregion
 
         #region Update
+        [Fact]
+        public void Update_WithValidInput_ReturnsUserDto()
+        {
+            // Arrange
+            var updateUserDto = new UpdateUserDto() {
+                UserName = "UpdatedUserName",
+                Email = "updatedEmail@test.com",
+                Password = "Password",
+                ConfirmPassword = "Password",
+                OldEmail = "test@test.com",
+                IsEditPassword = true
+            };
 
+            var user = new User()
+            {
+                Id = 0,
+                UserName = "UpdatedUserName",
+                Email = "updatedEmail@test.com",
+                Password = "Password",
+                Salt = "/someNotNullSalt"
+            };
+
+            _mockUserRepository.Setup(repo => repo.Update(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync(user)
+                .Callback(() => { user.Password = PasswordHasher.HashPassword(user.Password, user.Salt); });
+
+            // Act
+            var result = _userService.Update(updateUserDto);
+
+            // Assert
+            Assert.IsType<Task<UserDto>>(result);
+            Assert.NotNull(result.Result);
+            Assert.Equal(updateUserDto.UserName, result.Result.UserName);
+            Assert.Equal(updateUserDto.Email, result.Result.Email);
+        }
         #endregion
     }
 }
