@@ -8,6 +8,11 @@ namespace ReadingClub
     {
         public string ConnectionString { get; set; } = null!;
 
+        public void DeleteDatabase()
+        {
+            var tmp = ConnectionString;
+        }
+
         public async void Setup()
         {
             using (var connection = new SqliteConnection(ConnectionString))
