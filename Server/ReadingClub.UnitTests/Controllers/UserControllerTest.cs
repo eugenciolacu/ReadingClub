@@ -1,10 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Moq;
@@ -14,7 +10,6 @@ using ReadingClub.Controllers;
 using ReadingClub.Infrastructure.DTO.User;
 using ReadingClub.Services.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net;
 using System.Security.Claims;
 using System.Text;
 
@@ -39,9 +34,9 @@ namespace ReadingClub.UnitTests.Controllers
                     ""Audience"": ""http://localhost:62360/""
                 }
             }";
-            _mockConfiguration.Setup(x => x["Jwt:Key"]).Returns(JObject.Parse(json)["Jwt"]["Key"].ToString());
-            _mockConfiguration.Setup(x => x["Jwt:Issuer"]).Returns(JObject.Parse(json)["Jwt"]["Issuer"].ToString());
-            _mockConfiguration.Setup(x => x["Jwt:Audience"]).Returns(JObject.Parse(json)["Jwt"]["Audience"].ToString());
+            _mockConfiguration.Setup(x => x["Jwt:Key"]).Returns(JObject.Parse(json)["Jwt"]!["Key"]!.ToString());
+            _mockConfiguration.Setup(x => x["Jwt:Issuer"]).Returns(JObject.Parse(json)["Jwt"]!["Issuer"]!.ToString());
+            _mockConfiguration.Setup(x => x["Jwt:Audience"]).Returns(JObject.Parse(json)["Jwt"]!["Audience"]!.ToString());
 
             _controller = new UserController(_mockUserService.Object, _mockConfiguration.Object);
         }

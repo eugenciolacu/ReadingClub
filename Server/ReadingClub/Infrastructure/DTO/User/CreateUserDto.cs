@@ -18,7 +18,7 @@ namespace ReadingClub.Infrastructure.DTO.User
         [Required]
         public string Password { get; set; } = null!;
 
-        [Required(ErrorMessage = "The Confirm cassword field is required.")]
+        [Required(ErrorMessage = "The Confirm password field is required.")]
         [Compare("Password", ErrorMessage = "The Password and Confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = null!;
 

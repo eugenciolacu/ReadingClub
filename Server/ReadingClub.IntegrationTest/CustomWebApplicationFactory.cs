@@ -11,9 +11,16 @@ namespace ReadingClub.IntegrationTest
         {
             base.ConfigureWebHost(builder);
 
+            builder.UseEnvironment("Test");
+        }
+
+        protected override IWebHostBuilder CreateWebHostBuilder()
+        {
+            var builder = base.CreateWebHostBuilder();
+
             DeleteTestDatabase();
 
-            builder.UseEnvironment("Test");
+            return builder!;
         }
 
         private void DeleteTestDatabase()
@@ -25,21 +32,20 @@ namespace ReadingClub.IntegrationTest
 
             var testDbPath = Path.GetFullPath(Directory.GetCurrentDirectory() + configuration["PartialPathToDB"]!);
 
-            FileInfo fi = new FileInfo(testDbPath);
             try
             {
-                if(fi.Exists)
+                if(File.Exists(testDbPath))
                 {
                     using var connection = new SqliteConnection(configuration["ConnectionString"]!);
                     connection.Close();
                     GC.Collect();
                     GC.WaitForPendingFinalizers();
-                    fi.Delete();
+                    File.Delete(testDbPath);
                 }
             }
             catch (Exception)
             {
-                fi.Delete();
+                throw;
             }
         }
     }
