@@ -1,6 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using ReadingClub.Infrastructure.DTO.User;
 using System.Net;
+using Dapper;
+using Microsoft.Data.Sqlite;
+using ReadingClub.Domain;
 
 namespace ReadingClub.IntegrationTest.Controllers
 {
@@ -8,13 +12,22 @@ namespace ReadingClub.IntegrationTest.Controllers
     {
         private CustomWebApplicationFactory _customWebApplicationFactory;
         private HttpClient _httpClient;
+        private readonly IConfiguration _configuration;
+        private readonly string _connectionString;
 
         public UserControllerTest()
         {
             _customWebApplicationFactory = new CustomWebApplicationFactory();
             _httpClient = _customWebApplicationFactory.CreateClient();
-        }
 
+            _configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.Test.json")
+                .Build();
+
+            _connectionString = _configuration["ConnectionString"]!;
+        }
+        #region Create
         [Fact]
         public async Task Create_WithInvalidInput_ReturnsBadRequest()
         {
@@ -71,13 +84,115 @@ namespace ReadingClub.IntegrationTest.Controllers
         }
 
         [Fact]
+        public async Task Create_WithInvalidInput_ReturnsErrorResponse()
+        {
+            // Arrange
+            string someGuidAsRandomValue = Guid.NewGuid().ToString();
+
+            User user = new User()
+            {
+                UserName = someGuidAsRandomValue,
+                Email = someGuidAsRandomValue + "@test.com",
+                Password = "password",
+                Salt = someGuidAsRandomValue
+            };
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                var sqlQuery =
+                    @$"INSERT INTO users (username, email, password, salt) 
+                        VALUES(@UserName, @Email, @Password, @Salt);";
+                await connection.ExecuteAsync(sqlQuery, user);
+            }
+
+            // Arrange userName exists
+            var createUserDtoWithSameUserName = new CreateUserDto()
+            {
+                UserName = user.UserName,
+                Email = someGuidAsRandomValue + user.Email,
+                Password = user.Password,
+                ConfirmPassword = user.Password
+            };
+
+            string json1 = JsonConvert.SerializeObject(createUserDtoWithSameUserName);
+            HttpContent content1 = new StringContent(json1, System.Text.Encoding.UTF8, "application/json");
+
+            // Act
+            var response1 = await _httpClient.PostAsync("/api/User/create", content1);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response1.StatusCode);
+
+            var result1 = await response1.Content.ReadAsStringAsync();
+
+            var resultContent1 = JsonConvert.DeserializeAnonymousType(result1, new { Status = false, Message = (string)null! });
+
+            Assert.False(resultContent1!.Status);
+            Assert.Equal("This user name already exists.", resultContent1!.Message);
+
+            // Arrange email exists
+            var createUserDtoWithSameEmail = new CreateUserDto()
+            {
+                UserName = someGuidAsRandomValue + user.UserName,
+                Email = user.Email,
+                Password = user.Password,
+                ConfirmPassword = user.Password
+            };
+
+            string json2 = JsonConvert.SerializeObject(createUserDtoWithSameEmail);
+            HttpContent content2 = new StringContent(json2, System.Text.Encoding.UTF8, "application/json");
+
+
+            // Act
+            var response2 = await _httpClient.PostAsync("/api/User/create", content2);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response2.StatusCode);
+
+            var result2 = await response2.Content.ReadAsStringAsync();
+
+            var resultContent2 = JsonConvert.DeserializeAnonymousType(result2, new { Status = false, Message = (string)null! });
+
+            Assert.False(resultContent2!.Status);
+            Assert.Equal("This email already exists.", resultContent2!.Message);
+
+            // Arrange userName and email exists
+            var createUserDtoWithSameUserNameAndEmail = new CreateUserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                Password = user.Password,
+                ConfirmPassword = user.Password
+            };
+
+            string json3 = JsonConvert.SerializeObject(createUserDtoWithSameUserNameAndEmail);
+            HttpContent content3 = new StringContent(json3, System.Text.Encoding.UTF8, "application/json");
+
+
+            // Act
+            var response3 = await _httpClient.PostAsync("/api/User/create", content3);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response3.StatusCode);
+
+            var result3 = await response3.Content.ReadAsStringAsync();
+
+            var resultContent3 = JsonConvert.DeserializeAnonymousType(result3, new { Status = false, Message = (string)null! });
+
+            Assert.False(resultContent3!.Status);
+            Assert.Equal("This user name and emai already exists.", resultContent3!.Message);
+        }
+
+        [Fact]
         public async Task Create_WithValidInput_ReturnsCreatedUserAsUserDto()
         {
             // Arrange
+            string someGuidAsRandomValue = Guid.NewGuid().ToString();
+
             var createUserDto = new CreateUserDto()
             {
-                UserName = "Test",
-                Email = "test@test.com",
+                UserName = someGuidAsRandomValue,
+                Email = someGuidAsRandomValue + "@test.com",
                 Password = "password",
                 ConfirmPassword = "password"
             };
@@ -99,6 +214,7 @@ namespace ReadingClub.IntegrationTest.Controllers
             Assert.Equal(createUserDto.UserName, resultContent.Data.UserName);
             Assert.Equal(createUserDto.Email, resultContent.Data.Email);
         }
+        #endregion
 
         public void Dispose()
         {

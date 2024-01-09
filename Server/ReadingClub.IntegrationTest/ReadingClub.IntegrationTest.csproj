@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.123" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.14" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.14" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
