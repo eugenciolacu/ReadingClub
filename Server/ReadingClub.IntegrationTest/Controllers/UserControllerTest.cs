@@ -5,6 +5,9 @@ using System.Net;
 using Dapper;
 using Microsoft.Data.Sqlite;
 using ReadingClub.Domain;
+using System.Text;
+using ReadingClub.Infrastructure.Common.Helpers;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ReadingClub.IntegrationTest.Controllers
 {
@@ -88,13 +91,15 @@ namespace ReadingClub.IntegrationTest.Controllers
         {
             // Arrange
             string someGuidAsRandomValue = Guid.NewGuid().ToString();
+            var originalPassword = "password";
+            var hashedPassword = PasswordHasher.HashPassword(originalPassword, "someSalt");
 
             User user = new User()
             {
                 UserName = someGuidAsRandomValue,
                 Email = someGuidAsRandomValue + "@test.com",
-                Password = "password",
-                Salt = someGuidAsRandomValue
+                Password = hashedPassword,
+                Salt = "someSalt"
             };
 
             using (var connection = new SqliteConnection(_connectionString))
@@ -115,7 +120,7 @@ namespace ReadingClub.IntegrationTest.Controllers
             };
 
             string json1 = JsonConvert.SerializeObject(createUserDtoWithSameUserName);
-            HttpContent content1 = new StringContent(json1, System.Text.Encoding.UTF8, "application/json");
+            HttpContent content1 = new StringContent(json1, Encoding.UTF8, "application/json");
 
             // Act
             var response1 = await _httpClient.PostAsync("/api/User/create", content1);
@@ -140,7 +145,7 @@ namespace ReadingClub.IntegrationTest.Controllers
             };
 
             string json2 = JsonConvert.SerializeObject(createUserDtoWithSameEmail);
-            HttpContent content2 = new StringContent(json2, System.Text.Encoding.UTF8, "application/json");
+            HttpContent content2 = new StringContent(json2, Encoding.UTF8, "application/json");
 
 
             // Act
@@ -166,7 +171,7 @@ namespace ReadingClub.IntegrationTest.Controllers
             };
 
             string json3 = JsonConvert.SerializeObject(createUserDtoWithSameUserNameAndEmail);
-            HttpContent content3 = new StringContent(json3, System.Text.Encoding.UTF8, "application/json");
+            HttpContent content3 = new StringContent(json3, Encoding.UTF8, "application/json");
 
 
             // Act
@@ -198,7 +203,7 @@ namespace ReadingClub.IntegrationTest.Controllers
             };
 
             string json = JsonConvert.SerializeObject(createUserDto);
-            HttpContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
             var response = await _httpClient.PostAsync("/api/User/create", content);
@@ -214,6 +219,146 @@ namespace ReadingClub.IntegrationTest.Controllers
             Assert.Equal(createUserDto.UserName, resultContent.Data.UserName);
             Assert.Equal(createUserDto.Email, resultContent.Data.Email);
         }
+        #endregion
+
+        #region Login
+        [Fact]
+        public async Task Login_WithInvalidInput_ReturnsBadRequest()
+        {
+            // Arrange
+            var loginDtoWhenEmptyFields = new UserLoginDto() { };
+
+            string jsonWhenEmptyFields = JsonConvert.SerializeObject(loginDtoWhenEmptyFields);
+            HttpContent contentWhenEmptyFields = new StringContent(jsonWhenEmptyFields, Encoding.UTF8, "application/json");
+
+            // Act
+            var responseWhenEmptyFields = await _httpClient.PostAsync("/api/User/login", contentWhenEmptyFields);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, responseWhenEmptyFields.StatusCode);
+
+            var resultWhenEmptyFields = await responseWhenEmptyFields.Content.ReadAsStringAsync();
+
+            var resultContentWhenEmptyFields = JsonConvert.DeserializeAnonymousType(resultWhenEmptyFields,
+                new { errors = (Dictionary<string, string[]>)null! });
+            Assert.Equal(2, resultContentWhenEmptyFields!.errors.Count);
+            Assert.Equal("The Email field is required.", resultContentWhenEmptyFields!.errors["Email"][0]);
+            Assert.Equal("The Password field is required.", resultContentWhenEmptyFields!.errors["Password"][0]);
+        }
+
+        [Fact]
+        public async Task Login_WithValidInput_ReturnsTokenAsString()
+        {
+            // Arrange
+            string someGuidAsRandomValue = Guid.NewGuid().ToString();
+            var originalPassword = "password";
+            var hashedPassword = PasswordHasher.HashPassword(originalPassword, "someSalt");
+
+            User user = new User()
+            {
+                UserName = someGuidAsRandomValue,
+                Email = someGuidAsRandomValue + "@test.com",
+                Password = hashedPassword,
+                Salt = "someSalt"
+            };
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                var sqlQuery =
+                    @$"INSERT INTO users (username, email, password, salt) 
+                        VALUES(@UserName, @Email, @Password, @Salt);";
+                await connection.ExecuteAsync(sqlQuery, user);
+            }
+
+            var loginDto = new UserLoginDto()
+            {
+                Email = user.Email,
+                Password = originalPassword
+            };
+
+            string json = JsonConvert.SerializeObject(loginDto);
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/User/login", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (string)null! });
+
+            Assert.True(resultContent!.Status);
+            Assert.NotNull(resultContent.Data);
+        }
+
+        [Fact]
+        public async Task Login_WithInvalidInput_ReturnsErrorResponse()
+        {
+            // Arrange
+            string someGuidAsRandomValue = Guid.NewGuid().ToString();
+            var originalPassword = "password";
+            var hashedPassword = PasswordHasher.HashPassword(originalPassword, "someSalt");
+
+            User user = new User()
+            {
+                UserName = someGuidAsRandomValue,
+                Email = someGuidAsRandomValue + "@test.com",
+                Password = hashedPassword,
+                Salt = "someSalt"
+            };
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                var sqlQuery =
+                    @$"INSERT INTO users (username, email, password, salt) 
+                        VALUES(@UserName, @Email, @Password, @Salt);";
+                await connection.ExecuteAsync(sqlQuery, user);
+            }
+
+            var loginDto = new UserLoginDto()
+            {
+                Email = "wrongEmail@test.com",
+                Password = "wrongPassword"
+            };
+
+            string json = JsonConvert.SerializeObject(loginDto);
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/User/login", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Message = (string)null! });
+
+            Assert.False(resultContent!.Status);
+            Assert.Equal("User do not exists or password is incorrect.", resultContent!.Message);
+        }
+        #endregion
+
+        #region IsTokenValid
+
+        #endregion
+
+        #region Get
+
+        #endregion
+
+        #region Update
+
+        #endregion
+
+        #region Delete
+
+        #endregion
+
+        #region GetLoggedUser
+
         #endregion
 
         public void Dispose()
