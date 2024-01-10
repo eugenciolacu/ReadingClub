@@ -7,7 +7,6 @@ using Microsoft.Data.Sqlite;
 using ReadingClub.Domain;
 using System.Text;
 using ReadingClub.Infrastructure.Common.Helpers;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ReadingClub.IntegrationTest.Controllers
 {
@@ -90,31 +89,13 @@ namespace ReadingClub.IntegrationTest.Controllers
         public async Task Create_WithInvalidInput_ReturnsErrorResponse()
         {
             // Arrange
-            string someGuidAsRandomValue = Guid.NewGuid().ToString();
-            var originalPassword = "password";
-            var hashedPassword = PasswordHasher.HashPassword(originalPassword, "someSalt");
-
-            User user = new User()
-            {
-                UserName = someGuidAsRandomValue,
-                Email = someGuidAsRandomValue + "@test.com",
-                Password = hashedPassword,
-                Salt = "someSalt"
-            };
-
-            using (var connection = new SqliteConnection(_connectionString))
-            {
-                var sqlQuery =
-                    @$"INSERT INTO users (username, email, password, salt) 
-                        VALUES(@UserName, @Email, @Password, @Salt);";
-                await connection.ExecuteAsync(sqlQuery, user);
-            }
+            User user = await TestHelper.AddNewUserToTestDatabase();
 
             // Arrange userName exists
             var createUserDtoWithSameUserName = new CreateUserDto()
             {
                 UserName = user.UserName,
-                Email = someGuidAsRandomValue + user.Email,
+                Email = "another" + user.Email,
                 Password = user.Password,
                 ConfirmPassword = user.Password
             };
@@ -138,7 +119,7 @@ namespace ReadingClub.IntegrationTest.Controllers
             // Arrange email exists
             var createUserDtoWithSameEmail = new CreateUserDto()
             {
-                UserName = someGuidAsRandomValue + user.UserName,
+                UserName = "another" + user.UserName,
                 Email = user.Email,
                 Password = user.Password,
                 ConfirmPassword = user.Password
@@ -250,30 +231,12 @@ namespace ReadingClub.IntegrationTest.Controllers
         public async Task Login_WithValidInput_ReturnsTokenAsString()
         {
             // Arrange
-            string someGuidAsRandomValue = Guid.NewGuid().ToString();
-            var originalPassword = "password";
-            var hashedPassword = PasswordHasher.HashPassword(originalPassword, "someSalt");
-
-            User user = new User()
-            {
-                UserName = someGuidAsRandomValue,
-                Email = someGuidAsRandomValue + "@test.com",
-                Password = hashedPassword,
-                Salt = "someSalt"
-            };
-
-            using (var connection = new SqliteConnection(_connectionString))
-            {
-                var sqlQuery =
-                    @$"INSERT INTO users (username, email, password, salt) 
-                        VALUES(@UserName, @Email, @Password, @Salt);";
-                await connection.ExecuteAsync(sqlQuery, user);
-            }
+            User user = await TestHelper.AddNewUserToTestDatabase();
 
             var loginDto = new UserLoginDto()
             {
                 Email = user.Email,
-                Password = originalPassword
+                Password = TestHelper.OriginalPassword
             };
 
             string json = JsonConvert.SerializeObject(loginDto);
@@ -297,26 +260,6 @@ namespace ReadingClub.IntegrationTest.Controllers
         public async Task Login_WithInvalidInput_ReturnsErrorResponse()
         {
             // Arrange
-            string someGuidAsRandomValue = Guid.NewGuid().ToString();
-            var originalPassword = "password";
-            var hashedPassword = PasswordHasher.HashPassword(originalPassword, "someSalt");
-
-            User user = new User()
-            {
-                UserName = someGuidAsRandomValue,
-                Email = someGuidAsRandomValue + "@test.com",
-                Password = hashedPassword,
-                Salt = "someSalt"
-            };
-
-            using (var connection = new SqliteConnection(_connectionString))
-            {
-                var sqlQuery =
-                    @$"INSERT INTO users (username, email, password, salt) 
-                        VALUES(@UserName, @Email, @Password, @Salt);";
-                await connection.ExecuteAsync(sqlQuery, user);
-            }
-
             var loginDto = new UserLoginDto()
             {
                 Email = "wrongEmail@test.com",
