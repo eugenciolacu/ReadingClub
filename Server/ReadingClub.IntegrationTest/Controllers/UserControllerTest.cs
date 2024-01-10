@@ -2,11 +2,10 @@
 using Newtonsoft.Json;
 using ReadingClub.Infrastructure.DTO.User;
 using System.Net;
-using Dapper;
-using Microsoft.Data.Sqlite;
 using ReadingClub.Domain;
 using System.Text;
-using ReadingClub.Infrastructure.Common.Helpers;
+using Moq;
+using ReadingClub.Services.Interfaces;
 
 namespace ReadingClub.IntegrationTest.Controllers
 {
@@ -253,7 +252,8 @@ namespace ReadingClub.IntegrationTest.Controllers
             var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (string)null! });
 
             Assert.True(resultContent!.Status);
-            Assert.NotNull(resultContent.Data);
+            Assert.NotNull(resultContent!.Data);
+            Assert.NotEmpty(resultContent!.Data);
         }
 
         [Fact]
@@ -285,7 +285,165 @@ namespace ReadingClub.IntegrationTest.Controllers
         #endregion
 
         #region IsTokenValid
+        [Fact]
+        public async Task IsTokenValid_InvalidTokenResultingInNullUserDto_ReturnsErrorMessage()
+        {
+            // Arrange
+            UserDto userDto = new UserDto()
+            {
+                UserName = "",
+                Email = ""
+            };
 
+            string? token = TestHelper.GenerateToken(userDto);
+
+            string json = JsonConvert.SerializeObject(new TokenDto() { Token = token });
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/User/isTokenValid", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Message = (string)null! });
+
+            Assert.False(resultContent!.Status);
+            Assert.Equal("Token validation failed, user not found.", resultContent!.Message);
+        }
+
+        [Fact]
+        public async Task IsTokenValid_ValidToken_ReturnsTheSameToken()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            UserDto userDto = new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            };
+
+            string? token = TestHelper.GenerateToken(userDto);
+
+            string json = JsonConvert.SerializeObject(new TokenDto() { Token = token });
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/User/isTokenValid", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (string)null! });
+
+            Assert.True(resultContent!.Status);
+            Assert.NotNull(resultContent!.Data);
+            Assert.NotEmpty(resultContent!.Data);
+            Assert.Equal(token, resultContent!.Data);
+        }
+
+        [Fact]
+        public async Task IsTokenValid_TokenExpiredLesstTanAdayAgo_ReturnsNewToken()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            UserDto userDto = new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            };
+
+            string? expiredToken = TestHelper.GenerateTokenThithExpirationOfLessThanADay(userDto);
+
+            string json = JsonConvert.SerializeObject(new TokenDto() { Token = expiredToken });
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/User/isTokenValid", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (string)null! });
+
+            Assert.True(resultContent!.Status);
+            Assert.NotNull(resultContent!.Data);
+            Assert.NotEmpty(resultContent!.Data);
+            Assert.NotEqual(expiredToken, resultContent!.Data);
+            
+            string? validToken = TestHelper.GenerateToken(userDto);
+            Assert.Equal(validToken, resultContent!.Data); 
+        }
+
+        [Fact]
+        public async Task IsTokenValid_TokenExpiredMoreThanAdayAgo_ReturnsErrorMessage()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            UserDto userDto = new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            };
+
+            string? token = TestHelper.GenerateTokenThithExpirationOfMoreThanADay(userDto);
+
+            string json = JsonConvert.SerializeObject(new TokenDto() { Token = token });
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/User/isTokenValid", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Message = (string)null! });
+
+            Assert.False(resultContent!.Status);
+            Assert.Equal("Token validation failed.", resultContent!.Message);
+        }
+
+        [Fact]
+        public async Task IsTokenValid_ThrowsErrorDuringTokenValidation_ReturnsErrorMessage()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            UserDto userDto = new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            };
+
+            string? token = TestHelper.GenerateAlteredToken(userDto);
+
+            string json = JsonConvert.SerializeObject(new TokenDto() { Token = token });
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/User/isTokenValid", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Message = (string)null! });
+
+            Assert.False(resultContent!.Status);
+            Assert.Equal("Token validation failed.", resultContent!.Message);
+        }
         #endregion
 
         #region Get

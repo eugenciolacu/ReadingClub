@@ -362,7 +362,7 @@ namespace ReadingClub.UnitTests.Controllers
                 Email = "someValidEmail@gmail.com"
             };
 
-            string? token = GenerateWrongToken(userDto);
+            string? token = GenerateAlteredToken(userDto);
 
             _mockUserService.Setup(service => service.Get(It.IsAny<string>()))
                 .ReturnsAsync(userDto);
@@ -752,41 +752,27 @@ namespace ReadingClub.UnitTests.Controllers
 
         private string GenerateToken(UserDto userDto)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_mockConfiguration.Object["Jwt:Key"]!));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.Name, userDto.UserName),
-                new Claim(ClaimTypes.Email, userDto.Email)
-            };
-            var token = new JwtSecurityToken(_mockConfiguration.Object["Jwt:Issuer"],
-                _mockConfiguration.Object["Jwt:Audience"],
-                claims,
-                expires: DateTime.Now.AddMinutes(1),
-                signingCredentials: credentials);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return GenerateToken(userDto, DateTime.Now.AddMinutes(1));
         }
 
         private string GenerateTokenThithExpirationOfLessThanADay(UserDto userDto)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_mockConfiguration.Object["Jwt:Key"]!));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.Name, userDto.UserName),
-                new Claim(ClaimTypes.Email, userDto.Email)
-            };
-            var token = new JwtSecurityToken(_mockConfiguration.Object["Jwt:Issuer"],
-                _mockConfiguration.Object["Jwt:Audience"],
-                claims,
-                expires: DateTime.Now.AddMinutes(-10),
-                signingCredentials: credentials);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return GenerateToken(userDto, DateTime.Now.AddMinutes(-10));
         }
 
         private string GenerateTokenThithExpirationOfMoreThanADay(UserDto userDto)
+        {
+            return GenerateToken(userDto, DateTime.Now.AddDays(-1.1));
+        }
+
+        private string GenerateAlteredToken(UserDto userDto)
+        {
+            var token = GenerateToken(userDto);
+            var alteredToken = token.Substring(0, token.Length - 1);
+            return alteredToken;
+        }
+
+        private string GenerateToken(UserDto userDto, DateTime expires)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_mockConfiguration.Object["Jwt:Key"]!));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -798,15 +784,8 @@ namespace ReadingClub.UnitTests.Controllers
             var token = new JwtSecurityToken(_mockConfiguration.Object["Jwt:Issuer"],
                 _mockConfiguration.Object["Jwt:Audience"],
                 claims,
-                expires: DateTime.Now.AddDays(-1.1),
+                expires: expires,
                 signingCredentials: credentials);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        private string GenerateWrongToken(UserDto userDto)
-        {           
-            var token = new JwtSecurityToken();
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
