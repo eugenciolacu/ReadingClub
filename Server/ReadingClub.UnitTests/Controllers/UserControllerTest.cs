@@ -587,7 +587,7 @@ namespace ReadingClub.UnitTests.Controllers
             Assert.True(TestHelper.IsAttributePresent(_controller, "Delete", typeof(HttpDeleteAttribute)));
 
         [Fact]
-        public void Delete_WithInvalidInput_ReturnsErrorResponse()
+        public void Delete_WithInvalidClaimsIdentity_ReturnsErrorResponse()
         {
             // Arrange
             var claimsIdentity = new ClaimsIdentity();

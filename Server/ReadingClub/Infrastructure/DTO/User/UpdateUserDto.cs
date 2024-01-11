@@ -8,7 +8,7 @@ namespace ReadingClub.Infrastructure.DTO.User
         public string UserName { get; set; } = null!;
 
         [Required(ErrorMessage = "The Email address is required.")]
-        [EmailAddress(ErrorMessage = "Invalid Email address")]
+        [EmailAddress(ErrorMessage = "Invalid Email address.")]
         public string Email
         {
             get { return _email; }

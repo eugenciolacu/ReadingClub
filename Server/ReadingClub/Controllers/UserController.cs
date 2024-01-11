@@ -189,7 +189,7 @@ namespace ReadingClub.Controllers
                 userEmail = identity?.FindFirst(ClaimTypes.Email)?.Value;
             }
 
-            if (userEmail == null)
+            if (string.IsNullOrEmpty(userEmail))
             {
                 return Json(new { Status = false, Message = "An error occurred during processing, user not found." });
             }
