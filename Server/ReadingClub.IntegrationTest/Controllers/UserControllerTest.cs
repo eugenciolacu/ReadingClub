@@ -4,12 +4,6 @@ using System.Net;
 using ReadingClub.Domain;
 using System.Text;
 using System.Net.Http.Headers;
-using Moq;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using ReadingClub.Controllers;
-using System.Security.Claims;
-using System.Diagnostics.CodeAnalysis;
 
 namespace ReadingClub.IntegrationTest.Controllers
 {
@@ -23,6 +17,7 @@ namespace ReadingClub.IntegrationTest.Controllers
             _customWebApplicationFactory = new CustomWebApplicationFactory();
             _httpClient = _customWebApplicationFactory.CreateClient();
         }
+
         #region Create
         [Fact]
         public async Task Create_WithInvalidInput_ReturnsBadRequest()
