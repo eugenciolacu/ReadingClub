@@ -5,6 +5,11 @@ using ReadingClub.Domain;
 using System.Text;
 using System.Net.Http.Headers;
 using Moq;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using ReadingClub.Controllers;
+using System.Security.Claims;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ReadingClub.IntegrationTest.Controllers
 {
@@ -705,7 +710,7 @@ namespace ReadingClub.IntegrationTest.Controllers
         }
 
         [Fact]
-        public async Task Delete_WithValidInput_ReturnsActionResult()
+        public async Task Delete_WithValidInput_ReturnsSuccess()
         {
             // Arrange
             User user = await TestHelper.AddNewUserToTestDatabase();
@@ -776,7 +781,62 @@ namespace ReadingClub.IntegrationTest.Controllers
         #endregion
 
         #region GetLoggedUser
+        [Fact]
+        public async Task GetLoggedUser_WithValidToken_ReturnsLoggetUser()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
 
+            UserDto userDto = new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            };
+
+            string? token = TestHelper.GenerateToken(userDto);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/User/getLoggedUser", null);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (UserDto)null! });
+
+            Assert.True(resultContent?.Status);
+            Assert.Equal(user.UserName, resultContent?.Data.UserName);
+            Assert.Equal(user.Email.ToLower(), resultContent?.Data.Email);
+        }
+
+        [Fact]
+        public async Task GetLoggedUser_WithInvalidToken_ReturnsErrorResponse()
+        {
+            // Arrange
+            UserDto userDto = new UserDto()
+            {
+                UserName = "",
+                Email = "",
+            };
+
+            string? token = TestHelper.GenerateToken(userDto);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/User/getLoggedUser", null);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Message = (string)null! });
+
+            Assert.False(resultContent?.Status);
+            Assert.Equal("An error occurred during processing, user not found.", resultContent?.Message);
+        }
         #endregion
 
         public void Dispose()

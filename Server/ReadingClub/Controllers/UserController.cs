@@ -214,7 +214,7 @@ namespace ReadingClub.Controllers
                 string? email = identity?.FindFirst(ClaimTypes.Email)?.Value;
                 string? userName = identity?.FindFirst(ClaimTypes.Name)?.Value;
 
-                if (email != null && userName != null)
+                if ( string.IsNullOrEmpty(email) == false && string.IsNullOrEmpty(userName) == false)
                 {
                     return Json(new
                     {
