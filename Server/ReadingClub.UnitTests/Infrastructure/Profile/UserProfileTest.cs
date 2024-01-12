@@ -33,8 +33,8 @@ namespace ReadingClub.UnitTests.Infrastructure.Profile
             // Assert
             Assert.IsType<UserDto>(userDto);
             Assert.NotNull(userDto);
-            Assert.Equal(userDto.UserName, user.UserName);
-            Assert.Equal(userDto.Email, user.Email);
+            Assert.Equal(user.UserName, userDto.UserName);
+            Assert.Equal(user.Email, userDto.Email);
         }
 
         [Fact]  
@@ -53,8 +53,8 @@ namespace ReadingClub.UnitTests.Infrastructure.Profile
             // Assert
             Assert.IsType<User>(user);
             Assert.NotNull(user);
-            Assert.Equal(user.Email, userLoginDto.Email);
-            Assert.Equal(user.Password, userLoginDto.Password);
+            Assert.Equal(userLoginDto.Email, user.Email);
+            Assert.Equal(userLoginDto.Password, user.Password);
         }
 
         [Fact]
@@ -75,9 +75,9 @@ namespace ReadingClub.UnitTests.Infrastructure.Profile
             // Assert
             Assert.IsType<User>(user);
             Assert.NotNull(user);
-            Assert.Equal(user.UserName, createUserDto.UserName);
-            Assert.Equal(user.Email, createUserDto.Email);
-            Assert.Equal(user.Password, createUserDto.Password);
+            Assert.Equal(createUserDto.UserName, user.UserName);
+            Assert.Equal(createUserDto.Email, user.Email);
+            Assert.Equal(createUserDto.Password, user.Password);
         }
 
         [Fact]
@@ -100,9 +100,9 @@ namespace ReadingClub.UnitTests.Infrastructure.Profile
             // Assert
             Assert.IsType<User>(user);
             Assert.NotNull(user);
-            Assert.Equal(user.UserName, updateUserDto.UserName);
-            Assert.Equal(user.Email, updateUserDto.Email);
-            Assert.Equal(user.Password, updateUserDto.Password);
+            Assert.Equal(updateUserDto.UserName, user.UserName);
+            Assert.Equal(updateUserDto.Email, user.Email);
+            Assert.Equal(updateUserDto.Password, user.Password);
         }
     }
 }

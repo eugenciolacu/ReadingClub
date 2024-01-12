@@ -21,68 +21,12 @@ namespace ReadingClub.UnitTests.Services.Implementations
         
         private readonly IBookService _bookService;
 
-        // small file converted in base64 string with meme (see in ReadingClub.UnitTests.Infrastructure.Profile)
-        private readonly string _fileAsBase64WithMeme = "data:@file/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKC" +
-            "gkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N" +
-            "zc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAJQAlAMBIgACEQEDEQH/xAAcAAEAAgIDAQAAAAAAAAAAAAAABgcEBQECAwj/xAA4EAABB" +
-            "AECAwUFBgUFAAAAAAABAAIDBAUGERIhMQdBUWGBEyIyQnEUIzORobEVQ1JywSVTYqLR/8QAGgEBAAMBAQEAAAAAAAAAAAAAAAIDBAUBBv/EACYRAQACA" +
-            "gEDAwQDAAAAAAAAAAABAgMRBAUSMTJBkSJRcYETFCH/2gAMAwEAAhEDEQA/ALxREQEREBERARFqtUZU4TTuSybWcbqtZ8rW+JA5fqgycrk6WIoS38lYZ" +
-            "Xqwt4nyPPIf+nyWg0/2h6bz95lGhckbYlBMLJ4XR+1268JI2P06qjsxlMvlH4dmcytm5FZnE0kMhaIg/h93hAA2+IhZWWc6Oi+zGQ2aptZhf/Q9h3BH5" +
-            "KqcsRMR91c5IidPpELlVjpntCyMmVq0s3FWfBbeI2WYGFhjefhDmkncE8tx0Oys0KytomNwnExPhyiIvXoiIgIiICIiAiIgIiICIiAsPL0I8pi7lCb8O" +
-            "zC+J3kHDZZiIPlrMULtWCXB5KF1fL4zaSLfpM1nRzD37j9vyyZrbclh4PZfFeLYuHrtv8f5AOV19pumYc7p6axDEP4rj2OsU5Wj3+Jo34N+8O2226dFR" +
-            "Wm6FjI5JtSm50TLc0bK5H8kT8Je4f2tB29VTbHHlXaiZaMxc2odSVW1BvQx07Zrlj5eJvNsYPQu32J8AFeYWBgsRRweMgx2NhbDWhbs0DqT3uJ7yepK2" +
-            "CspWKxqE6xqNCIik9EREBERAREQEREBERARF1J270HJOyh+qu0XA6cmNR8kl3IdPsdMcbwfM9G+p38lEdY65u6gsz4jS1g1sfE72drJs+KQ97Yv24vy8" +
-            "4/jcbVxkBiqR8O53c8ndzj4kqu+SKujw+m5eT9Xiv3ba92ha0yRIx2Lx+Kru5A2iZZNv2HqFEMdiM/jp2WaeWrRTxuDmfccQa4DYEbhb+SeCOQMkmiY9" +
-            "3RrngEr0e5rGOc8hrWjdzncgAqJzWl2KdI4kR9U7/bvBrftCxzg6X+G5WIdWez4HEeRG3+VLtLdq+HytptDMQyYbIEgCOyfu3HuAfy29QPVQarfp23OZ" +
-            "VtQyuHUMeCV1yWNqZOAw3Yg9vc7o5v0PcpRmmPVCjL0bHevdgsv4EHouVTPZ1q+7p7J19MahsGejYIZjrr+rHf7bv0A8Pp0uUdFoiduBkx2x2mto1MOU" +
-            "RF6gIiICIiAiIgIiICrftZ1DOwQ6YxUpjt32F1qZp5wVxyPq7mB6qxyqElsuyWrNR5KUu4zddVaD8rIvdAH5bqF7dtdtfCwRnz1pPj3d6teGpXjr12Bk" +
-            "UY2a0dwXr3rhFi3v/X2sViK9sNV2fnBYPMOz2rsnUdYlllqmm+IvfC87ESuHP3dg4b7bDiHp21RBWz7oW4yx9hxFm8D7aVhAjhO4Dy3rw78wOWwI3225" +
-            "ZdmpVlPt5qkU0kbS5pdGHO5DfYErDp5+lbiqeydvPOQ012nd0Z+bfwA8Vo/k3rUODHT64bXrfJ6vHy29LV2DdpKtpOnA6fI05RC2WGP7o8D/enDvBwBO" +
-            "3U8Wy6LrHFHFxCKNjN+vC0DddlVkv3z4dHgcP8Aq0mszvbEy9CPJ0JasnIu5sd3scOhVr9m+el1FpKlbtb/AGuPeCzv19ow7E+vI+qrRS3sTH+mZ17Pw" +
-            "n5aQsPc73GAkeqtwT5hzOuYqxNb+/hY6Ii0PnxERAREQEREBERAKovU2PfprWt+CdvBRy0v2qnJ8pefxGE+O/P8vFXotVqLA47UeNkx+VriWF3MEcnMP" +
-            "9TT3FRtWLRqV3Hz2wZYyV9lP7jcDcc+i2dLAZa7sYKE4afmkbwD/tstzXwmsNJSH+FR0NRUR8LbQENwDuHtNtnfU/os6LtKp1nmPUWEzOFc3k6SzULof" +
-            "R7d+XntsqYwR7y7GTrt59FNflrq+hMtIN5pakXkHucf2/yvWLs0dFI+aOzUjlf8b2V9i76lTnE5XHZit9pxV2vbh6ccMgcAfA7dD5FZvJWRirDFbqvJt" +
-            "O9x8QribQOTaPuLVSQ+Di5v+CtVc0zmaY3fSfI0dXQfefoOf6KwtSaqw2m42HJ2w2WT8KvGOOWX+1g5n69FE7Ga1vqwex09iH6foycnX8o3afh/4Rjof" +
-            "r49R1Xk4aysp1nk19WpQa4b1nIx4LDwOfmLHLgkaWiu3bm+TvaADuPTy3ujSWAraawFTFVDxMgb7zz1keebnH6lYmjdIY/StWUVzLZuWDxWbtk8Usx8z" +
-            "4eSkanSkVjUMnL5d+TfusIiKTKIiICIiAiIgIiICIiAuj42vBDwHNPUEbhd0QQfU+kI6LJ8/pJjcbma7DKWQDhiuBoJMcjBsDv49QVKNP5OPN4OhlIml" +
-            "rLcDJeA/LxDcj06KOa4z8z3jS2A+9zmQjIJb0pwnk6V57tt+Q7zsvVubx2m6dTTuJjmymQq12Qx06g4nDhbsDI74YwduriPVB49n+KgsRWtRXg2xmLtm" +
-            "Zskz+ZgayRzBEzwDeHbl1Kmi02ksZYxWGbDdcw2pZpbM/s/ha+WRz3Nb5Au238luUBERAREQEREBERAREQEREBERAXnZe6OvLIxvE9rCWt8SB0XoiCrN" +
-            "I7jsuv6hgsudlck2Se9cZ70jPeIdt124Gb7Du26KwsHjMdisdDXxEMcVXYOaWc+Pf5ierieu55lQ7I4fKaLvW8xpmv9txFl5lyGIHJzXH4pIfPb5e/8t" +
-            "tlpzKUI6NO5hZva4C3I2JsPQ0ZHHYMA7m8RDeH5SRt7vQJgiIgIiICIiAiIgIiICIiAiIgIiICIiDgqqqrWx9o2d05io/uLc9S7O1rfchLTxyu8i7Zg+" +
-            "rvJTnWuooNLadtZaw3j9kOGKPfbjkPJrd+4b9T3DdaTsqxFythp81mW/wCq5qY3J9xsWNPwM58wAO7u327kE4REQEREBERAREQEREBERAREQEREBERBW" +
-            "Or4DqrtRw+nZueOxtf+JWYz/MdxcIBHq30cVZo5DZRGzibtLtJr5yvC6eleoGlZ4dvuHtPG158iAW8u9S4dEHKIiAiIgIiICIiAiIgIiICIiAiIgIiIO" +
-            "CuURAREQEREBERAREQEREH/2Q==";
-        private readonly string _fileAsBase64WithoutMeme =  "/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAW" +
-            "IB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3" +
-            "Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAJQAlAMBIgACEQEDEQH/xAAcAAEAAgIDAQAAAAAAAAAAAAAABgcEBQECAwj/xAA4EAABBAECAwUFBgUFAAAAAAAB" +
-            "AAIDBAUGERIhMQdBUWGBEyIyQnEUIzORobEVQ1JywSVTYqLR/8QAGgEBAAMBAQEAAAAAAAAAAAAAAAIDBAUBBv/EACYRAQACAgEDAwQDAAAAAAAAAAAB" +
-            "AgMRBAUSMTJBkSJRcYETFCH/2gAMAwEAAhEDEQA/ALxREQEREBERARFqtUZU4TTuSybWcbqtZ8rW+JA5fqgycrk6WIoS38lYZXqwt4nyPPIf+nyWg0/2" +
-            "h6bz95lGhckbYlBMLJ4XR+1268JI2P06qjsxlMvlH4dmcytm5FZnE0kMhaIg/h93hAA2+IhZWWc6Oi+zGQ2aptZhf/Q9h3BH5KqcsRMR91c5IidPpELl" +
-            "VjpntCyMmVq0s3FWfBbeI2WYGFhjefhDmkncE8tx0Oys0KytomNwnExPhyiIvXoiIgIiICIiAiIgIiICIiAsPL0I8pi7lCb8OzC+J3kHDZZiIPlrMULt" +
-            "WCXB5KF1fL4zaSLfpM1nRzD37j9vyyZrbclh4PZfFeLYuHrtv8f5AOV19pumYc7p6axDEP4rj2OsU5Wj3+Jo34N+8O2226dFRWm6FjI5JtSm50TLc0bK" +
-            "5H8kT8Je4f2tB29VTbHHlXaiZaMxc2odSVW1BvQx07Zrlj5eJvNsYPQu32J8AFeYWBgsRRweMgx2NhbDWhbs0DqT3uJ7yepK2CspWKxqE6xqNCIik9ER" +
-            "EBERAREQEREBERARF1J270HJOyh+qu0XA6cmNR8kl3IdPsdMcbwfM9G+p38lEdY65u6gsz4jS1g1sfE72drJs+KQ97Yv24vy84/jcbVxkBiqR8O53c8n" +
-            "dzj4kqu+SKujw+m5eT9Xiv3ba92ha0yRIx2Lx+Kru5A2iZZNv2HqFEMdiM/jp2WaeWrRTxuDmfccQa4DYEbhb+SeCOQMkmiY93RrngEr0e5rGOc8hrWj" +
-            "dzncgAqJzWl2KdI4kR9U7/bvBrftCxzg6X+G5WIdWez4HEeRG3+VLtLdq+HytptDMQyYbIEgCOyfu3HuAfy29QPVQarfp23OZVtQyuHUMeCV1yWNqZOA" +
-            "w3Yg9vc7o5v0PcpRmmPVCjL0bHevdgsv4EHouVTPZ1q+7p7J19MahsGejYIZjrr+rHf7bv0A8Pp0uUdFoiduBkx2x2mto1MOURF6gIiICIiAiIgIiICr" +
-            "ftZ1DOwQ6YxUpjt32F1qZp5wVxyPq7mB6qxyqElsuyWrNR5KUu4zddVaD8rIvdAH5bqF7dtdtfCwRnz1pPj3d6teGpXjr12BkUY2a0dwXr3rhFi3v/X2" +
-            "sViK9sNV2fnBYPMOz2rsnUdYlllqmm+IvfC87ESuHP3dg4b7bDiHp21RBWz7oW4yx9hxFm8D7aVhAjhO4Dy3rw78wOWwI3225ZdmpVlPt5qkU0kbS5pd" +
-            "GHO5DfYErDp5+lbiqeydvPOQ012nd0Z+bfwA8Vo/k3rUODHT64bXrfJ6vHy29LV2DdpKtpOnA6fI05RC2WGP7o8D/enDvBwBO3U8Wy6LrHFHFxCKNjN+" +
-            "vC0DddlVkv3z4dHgcP8Aq0mszvbEy9CPJ0JasnIu5sd3scOhVr9m+el1FpKlbtb/AGuPeCzv19ow7E+vI+qrRS3sTH+mZ17Pwn5aQsPc73GAkeqtwT5h" +
-            "zOuYqxNb+/hY6Ii0PnxERAREQEREBERAKovU2PfprWt+CdvBRy0v2qnJ8pefxGE+O/P8vFXotVqLA47UeNkx+VriWF3MEcnMP9TT3FRtWLRqV3Hz2wZY" +
-            "yV9lP7jcDcc+i2dLAZa7sYKE4afmkbwD/tstzXwmsNJSH+FR0NRUR8LbQENwDuHtNtnfU/os6LtKp1nmPUWEzOFc3k6SzULofR7d+XntsqYwR7y7GTrt" +
-            "59FNflrq+hMtIN5pakXkHucf2/yvWLs0dFI+aOzUjlf8b2V9i76lTnE5XHZit9pxV2vbh6ccMgcAfA7dD5FZvJWRirDFbqvJtO9x8QribQOTaPuLVSQ+" +
-            "Di5v+CtVc0zmaY3fSfI0dXQfefoOf6KwtSaqw2m42HJ2w2WT8KvGOOWX+1g5n69FE7Ga1vqwex09iH6foycnX8o3afh/4Rjofr49R1Xk4aysp1nk19Wp" +
-            "Qa4b1nIx4LDwOfmLHLgkaWiu3bm+TvaADuPTy3ujSWAraawFTFVDxMgb7zz1keebnH6lYmjdIY/StWUVzLZuWDxWbtk8Usx8z4eSkanSkVjUMnL5d+Tf" +
-            "usIiKTKIiICIiAiIgIiICIiAuj42vBDwHNPUEbhd0QQfU+kI6LJ8/pJjcbma7DKWQDhiuBoJMcjBsDv49QVKNP5OPN4OhlImlrLcDJeA/LxDcj06KOa4" +
-            "z8z3jS2A+9zmQjIJb0pwnk6V57tt+Q7zsvVubx2m6dTTuJjmymQq12Qx06g4nDhbsDI74YwduriPVB49n+KgsRWtRXg2xmLtmZskz+ZgayRzBEzwDeHb" +
-            "l1Kmi02ksZYxWGbDdcw2pZpbM/s/ha+WRz3Nb5Au238luUBERAREQEREBERAREQEREBERAXnZe6OvLIxvE9rCWt8SB0XoiCrNI7jsuv6hgsudlck2Se9" +
-            "cZ70jPeIdt124Gb7Du26KwsHjMdisdDXxEMcVXYOaWc+Pf5ierieu55lQ7I4fKaLvW8xpmv9txFl5lyGIHJzXH4pIfPb5e/8ttlpzKUI6NO5hZva4C3I" +
-            "2JsPQ0ZHHYMA7m8RDeH5SRt7vQJgiIgIiICIiAiIgIiICIiAiIgIiICIiDgqqqrWx9o2d05io/uLc9S7O1rfchLTxyu8i7Zg+rvJTnWuooNLadtZaw3j" +
-            "9kOGKPfbjkPJrd+4b9T3DdaTsqxFythp81mW/wCq5qY3J9xsWNPwM58wAO7u327kE4REQEREBERAREQEREBERAREQEREBERBWOr4DqrtRw+nZueOxtf+" +
-            "JWYz/MdxcIBHq30cVZo5DZRGzibtLtJr5yvC6eleoGlZ4dvuHtPG158iAW8u9S4dEHKIiAiIgIiICIiAiIgIiICIiAiIgIiIOCuURAREQEREBERAREQE" +
-            "REH/2Q==";
-        private readonly string _fileAsBase64Meme = "data:@file/jpeg;base64";
+        // small file converted in base64 string with meme (see in ReadingClub.FilesForTesting project)
+        private readonly string _coverAsBase64WithMeme = FilesForTesting.Files.CoverAsBase64WithMeme;
+        private readonly string _coverAsBase64WithoutMeme = FilesForTesting.Files.CoverAsBase64WithoutMeme;
+        private readonly string _coverAsBase64Meme = FilesForTesting.Files.CoverAsBase64Meme;
+        private readonly string _fileAsBase64WithMeme = FilesForTesting.Files.FileAsBase64WithMeme;
+        private readonly string _fileAsBase64WithoutMeme = FilesForTesting.Files.FileAsBase64WithoutMeme;
 
         private readonly PagedRequest _validPagedRequest = new PagedRequest()
         {
@@ -125,7 +69,7 @@ namespace ReadingClub.UnitTests.Services.Implementations
                 Authors = "Some Authors",
                 ISBN = "111-2-33-444444-5",
                 Description = "Some description",
-                Cover = _fileAsBase64WithMeme,
+                Cover = _coverAsBase64WithMeme,
                 CoverName = "Test cover",
                 File = _fileAsBase64WithMeme,
                 FileName = "Test file",
@@ -142,9 +86,9 @@ namespace ReadingClub.UnitTests.Services.Implementations
                     Authors = "Some Authors",
                     ISBN = "111-2-33-444444-5",
                     Description = "Some description",
-                    Cover = Convert.FromBase64String(_fileAsBase64WithoutMeme),
+                    Cover = Convert.FromBase64String(_coverAsBase64WithoutMeme),
                     CoverName = "Test cover",
-                    CoverMime = _fileAsBase64Meme,
+                    CoverMime = _coverAsBase64Meme,
                     File = Convert.FromBase64String(_fileAsBase64WithoutMeme),
                     FileName = "Test file",
                     AddedBy = 1234
@@ -157,9 +101,9 @@ namespace ReadingClub.UnitTests.Services.Implementations
                     Authors = "Some Authors",
                     ISBN = "111-2-33-444444-5",
                     Description = "Some description",
-                    Cover = Convert.FromBase64String(_fileAsBase64WithoutMeme),
+                    Cover = Convert.FromBase64String(_coverAsBase64WithoutMeme),
                     CoverName = "Test cover",
-                    CoverMime = _fileAsBase64Meme,
+                    CoverMime = _coverAsBase64Meme,
                     File = Convert.FromBase64String(_fileAsBase64WithoutMeme),
                     FileName = "Test file",
                     AddedBy = 1234,
@@ -179,9 +123,9 @@ namespace ReadingClub.UnitTests.Services.Implementations
             Assert.Equal("Some Authors", result.Result.Authors);
             Assert.Equal("111-2-33-444444-5", result.Result.ISBN);
             Assert.Equal("Some description", result.Result.Description);
-            Assert.Equal(_fileAsBase64WithoutMeme, result.Result.Cover);
+            Assert.Equal(_coverAsBase64WithoutMeme, result.Result.Cover);
             Assert.Equal("Test cover", result.Result.CoverName);
-            Assert.Equal(_fileAsBase64Meme, result.Result.CoverMime);
+            Assert.Equal(_coverAsBase64Meme, result.Result.CoverMime);
             Assert.Equal("Test file", result.Result.FileName);
             Assert.Equal("someUsernameCorespondingToUserId=1234", result.Result.AddedByUserName);
             Assert.False(result.Result.IsInReadingList);
@@ -204,9 +148,9 @@ namespace ReadingClub.UnitTests.Services.Implementations
                 Authors = "Some Authors",
                 ISBN = "111-2-33-444444-5",
                 Description = "Some description",
-                Cover = Encoding.ASCII.GetBytes(_fileAsBase64WithoutMeme),
+                Cover = Encoding.ASCII.GetBytes(_coverAsBase64WithoutMeme),
                 CoverName = "Test cover",
-                CoverMime = _fileAsBase64Meme,
+                CoverMime = _coverAsBase64Meme,
                 File = Encoding.ASCII.GetBytes(_fileAsBase64WithoutMeme),
                 FileName = "Test file",
                 AddedBy = 123
@@ -251,9 +195,9 @@ namespace ReadingClub.UnitTests.Services.Implementations
                 Authors = "Some Authors",
                 ISBN = "111-2-33-444444-5",
                 Description = "Some description",
-                Cover = Encoding.ASCII.GetBytes(_fileAsBase64WithoutMeme),
+                Cover = Encoding.ASCII.GetBytes(_coverAsBase64WithoutMeme),
                 CoverName = "Test cover",
-                CoverMime = _fileAsBase64Meme,
+                CoverMime = _coverAsBase64Meme,
                 File = Encoding.ASCII.GetBytes(_fileAsBase64WithoutMeme),
                 FileName = "Test file",
                 AddedBy = 123,
@@ -290,9 +234,9 @@ namespace ReadingClub.UnitTests.Services.Implementations
                             Authors = "Some Authors",
                             ISBN = "111-2-33-444444-5",
                             Description = "Some description",
-                            Cover = Convert.FromBase64String(_fileAsBase64WithoutMeme),
+                            Cover = Convert.FromBase64String(_coverAsBase64WithoutMeme),
                             CoverName = "Test cover",
-                            CoverMime = _fileAsBase64Meme,
+                            CoverMime = _coverAsBase64Meme,
                             File = Convert.FromBase64String(_fileAsBase64WithoutMeme),
                             FileName = "Test file",
                             AddedBy = 123,
@@ -315,9 +259,9 @@ namespace ReadingClub.UnitTests.Services.Implementations
             Assert.Equal("Some Authors", result.Result.Items[0].Authors);
             Assert.Equal("111-2-33-444444-5", result.Result.Items[0].ISBN);
             Assert.Equal("Some description", result.Result.Items[0].Description);
-            Assert.Equal(_fileAsBase64WithoutMeme, result.Result.Items[0].Cover);
+            Assert.Equal(_coverAsBase64WithoutMeme, result.Result.Items[0].Cover);
             Assert.Equal("Test cover", result.Result.Items[0].CoverName);
-            Assert.Equal(_fileAsBase64Meme, result.Result.Items[0].CoverMime);
+            Assert.Equal(_coverAsBase64Meme, result.Result.Items[0].CoverMime);
             Assert.Equal("Test file", result.Result.Items[0].FileName);
             Assert.Equal("Some user name", result.Result.Items[0].AddedByUserName);
             Assert.False(result.Result.Items[0].IsInReadingList);
@@ -341,9 +285,9 @@ namespace ReadingClub.UnitTests.Services.Implementations
                             Authors = "Some Authors",
                             ISBN = "111-2-33-444444-5",
                             Description = "Some description",
-                            Cover = Convert.FromBase64String(_fileAsBase64WithoutMeme),
+                            Cover = Convert.FromBase64String(_coverAsBase64WithoutMeme),
                             CoverName = "Test cover",
-                            CoverMime = _fileAsBase64Meme,
+                            CoverMime = _coverAsBase64Meme,
                             File = Convert.FromBase64String(_fileAsBase64WithoutMeme),
                             FileName = "Test file",
                             AddedBy = 123,
@@ -366,9 +310,9 @@ namespace ReadingClub.UnitTests.Services.Implementations
             Assert.Equal("Some Authors", result.Result.Items[0].Authors);
             Assert.Equal("111-2-33-444444-5", result.Result.Items[0].ISBN);
             Assert.Equal("Some description", result.Result.Items[0].Description);
-            Assert.Equal(_fileAsBase64WithoutMeme, result.Result.Items[0].Cover);
+            Assert.Equal(_coverAsBase64WithoutMeme, result.Result.Items[0].Cover);
             Assert.Equal("Test cover", result.Result.Items[0].CoverName);
-            Assert.Equal(_fileAsBase64Meme, result.Result.Items[0].CoverMime);
+            Assert.Equal(_coverAsBase64Meme, result.Result.Items[0].CoverMime);
             Assert.Equal("Test file", result.Result.Items[0].FileName);
             Assert.Equal("Some user name", result.Result.Items[0].AddedByUserName);
             Assert.False(result.Result.Items[0].IsInReadingList);
@@ -392,9 +336,9 @@ namespace ReadingClub.UnitTests.Services.Implementations
                             Authors = "Some Authors",
                             ISBN = "111-2-33-444444-5",
                             Description = "Some description",
-                            Cover = Convert.FromBase64String(_fileAsBase64WithoutMeme),
+                            Cover = Convert.FromBase64String(_coverAsBase64WithoutMeme),
                             CoverName = "Test cover",
-                            CoverMime = _fileAsBase64Meme,
+                            CoverMime = _coverAsBase64Meme,
                             File = Convert.FromBase64String(_fileAsBase64WithoutMeme),
                             FileName = "Test file",
                             AddedBy = 123,
@@ -417,9 +361,9 @@ namespace ReadingClub.UnitTests.Services.Implementations
             Assert.Equal("Some Authors", result.Result.Items[0].Authors);
             Assert.Equal("111-2-33-444444-5", result.Result.Items[0].ISBN);
             Assert.Equal("Some description", result.Result.Items[0].Description);
-            Assert.Equal(_fileAsBase64WithoutMeme, result.Result.Items[0].Cover);
+            Assert.Equal(_coverAsBase64WithoutMeme, result.Result.Items[0].Cover);
             Assert.Equal("Test cover", result.Result.Items[0].CoverName);
-            Assert.Equal(_fileAsBase64Meme, result.Result.Items[0].CoverMime);
+            Assert.Equal(_coverAsBase64Meme, result.Result.Items[0].CoverMime);
             Assert.Equal("Test file", result.Result.Items[0].FileName);
             Assert.Equal("Some user name", result.Result.Items[0].AddedByUserName);
             Assert.False(result.Result.Items[0].IsInReadingList);
@@ -432,8 +376,12 @@ namespace ReadingClub.UnitTests.Services.Implementations
         public void Update_WithValidInput_ReturnsBookDto()
         {
             // Arrange
+            var updatedCoverAsBase64WithMeme = "/someUpdates" + _coverAsBase64WithMeme;
+            var updatedCoverAsBase64WithoutMeme = "/someUpdates" + _coverAsBase64WithoutMeme;
+
             var updatedFileAsBase64WithMeme = "/someUpdates" + _fileAsBase64WithMeme;
             var updatedFileAsBase64WithoutMeme = "/someUpdates" + _fileAsBase64WithoutMeme;
+
 
             var updateBookDto = new UpdateBookDto()
             {
@@ -442,7 +390,7 @@ namespace ReadingClub.UnitTests.Services.Implementations
                 Authors = "Update Authors",
                 ISBN = "5-4-33-222222-1",
                 Description = "Updated description",
-                Cover = updatedFileAsBase64WithMeme,
+                Cover = updatedCoverAsBase64WithMeme,
                 CoverName = "Updated cover",
                 IsCoverEdited = true,
                 File = updatedFileAsBase64WithMeme,
@@ -458,9 +406,9 @@ namespace ReadingClub.UnitTests.Services.Implementations
                     Authors = "Updated Authors",
                     ISBN = "5-4-33-222222-1",
                     Description = "Updated description",
-                    Cover = Convert.FromBase64String(updatedFileAsBase64WithoutMeme),
+                    Cover = Convert.FromBase64String(updatedCoverAsBase64WithoutMeme),
                     CoverName = "Updated cover",
-                    CoverMime = _fileAsBase64Meme,
+                    CoverMime = _coverAsBase64Meme,
                     File = Convert.FromBase64String(updatedFileAsBase64WithoutMeme),
                     FileName = "Updated file",
                     AddedBy = 1234
@@ -473,9 +421,9 @@ namespace ReadingClub.UnitTests.Services.Implementations
                     Authors = "Updated Authors",
                     ISBN = "5-4-33-222222-1",
                     Description = "Updated description",
-                    Cover = Convert.FromBase64String(updatedFileAsBase64WithoutMeme),
+                    Cover = Convert.FromBase64String(updatedCoverAsBase64WithoutMeme),
                     CoverName = "Updated cover",
-                    CoverMime = _fileAsBase64Meme,
+                    CoverMime = _coverAsBase64Meme,
                     File = Convert.FromBase64String(updatedFileAsBase64WithoutMeme),
                     FileName = "Updated file",
                     AddedBy = 1234,
@@ -495,9 +443,9 @@ namespace ReadingClub.UnitTests.Services.Implementations
             Assert.Equal("Updated Authors", result.Result.Authors);
             Assert.Equal("5-4-33-222222-1", result.Result.ISBN);
             Assert.Equal("Updated description", result.Result.Description);
-            Assert.Equal(updatedFileAsBase64WithoutMeme, result.Result.Cover);
+            Assert.Equal(updatedCoverAsBase64WithoutMeme, result.Result.Cover);
             Assert.Equal("Updated cover", result.Result.CoverName);
-            Assert.Equal(_fileAsBase64Meme, result.Result.CoverMime);
+            Assert.Equal(_coverAsBase64Meme, result.Result.CoverMime);
             Assert.Equal("Updated file", result.Result.FileName);
             Assert.Equal("someUsernameCorespondingToUserId=1234", result.Result.AddedByUserName);
             Assert.False(result.Result.IsInReadingList);
@@ -515,8 +463,6 @@ namespace ReadingClub.UnitTests.Services.Implementations
                 bookId: 123,
                 isRead: false
             );
-
-            //_mockBookRepository.Setup(repo => repo.AddToReadingList(It.IsAny<BookToReadingListDto>()));
 
             // Act
             var result = _bookService.AddToReadingList(bookToReadingListDto);
@@ -537,8 +483,6 @@ namespace ReadingClub.UnitTests.Services.Implementations
                 isRead: false
             );
 
-            //_mockBookRepository.Setup(repo => repo.RemoveFromReadingList(It.IsAny<BookToReadingListDto>()));
-
             // Act
             var result = _bookService.RemoveFromReadingList(bookToReadingListDto);
 
@@ -557,8 +501,6 @@ namespace ReadingClub.UnitTests.Services.Implementations
                 bookId: 123,
                 isRead: true
             );
-
-            //_mockBookRepository.Setup(repo => repo.MarkAsReadOrUnread(It.IsAny<BookToReadingListDto>()));
 
             // Act
             var result = _bookService.MarkAsReadOrUnread(bookToReadingListDto);

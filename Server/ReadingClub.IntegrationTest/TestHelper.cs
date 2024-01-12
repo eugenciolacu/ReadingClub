@@ -15,6 +15,25 @@ namespace ReadingClub.IntegrationTest
     {
         public static string OriginalPassword { get; } = "password";
 
+        //public static async Task<Book> AddNewBookToTestDatabase(int addedByUserId)
+        //{
+        //    var configuration = new ConfigurationBuilder()
+        //        .SetBasePath(Directory.GetCurrentDirectory())
+        //        .AddJsonFile("appsettings.Test.json")
+        //        .Build();
+
+        //    string someGuidAsRandomValue = Guid.NewGuid().ToString();
+
+        //    Book book = new Book()
+        //    {
+        //        Title = "Title" + someGuidAsRandomValue,
+        //        Authors = "Authors" + someGuidAsRandomValue,
+        //        ISBN = "ISBN" + someGuidAsRandomValue,
+        //        Description = "Description" + someGuidAsRandomValue,
+
+        //    };
+        //}
+
         public static async Task<User> AddNewUserToTestDatabase()
         {
             var configuration = new ConfigurationBuilder()

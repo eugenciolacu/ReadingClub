@@ -66,8 +66,7 @@ namespace ReadingClub.IntegrationTest.Controllers
             var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (PagedResponse<BookDto>)null! });
 
             Assert.True(resultContent?.Status);
-            //Assert.Equal(updateUserDto.UserName, resultContent?.Data.UserName);
-            //Assert.Equal(updateUserDto.Email.ToLower(), resultContent?.Data.Email);
+            Assert.IsType<PagedResponse<BookDto>>(resultContent?.Data);
         }
         #endregion
 

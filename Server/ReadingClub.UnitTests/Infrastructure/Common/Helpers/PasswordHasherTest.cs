@@ -42,10 +42,10 @@ namespace ReadingClub.UnitTests.Infrastructure.Common.Helpers
         {
             // Arrange
             var password = "testPassword";
-            var saltAsBase64String = "dGVzdCBzYWx0"; // base64String representation for "test salt"
+            var salt = "someSalt"; // base64String representation for "test salt"
             
             // Act
-            var hashedPassword = PasswordHasher.HashPassword(password, saltAsBase64String);
+            var hashedPassword = PasswordHasher.HashPassword(password, salt);
 
             // Assert
             Assert.NotNull(hashedPassword);
@@ -58,12 +58,12 @@ namespace ReadingClub.UnitTests.Infrastructure.Common.Helpers
         {
             // Arrange
             var password = "testPassword";
-            var salt_1_AsBase64String = "dGVzdCBzYWx0"; // base64String representation for "test salt"
-            var salt_2_AsBase64String = "YW5vdGhlciB0ZXN0IHNhbHQ="; // base64String representation for "another test salt"
+            var salt_1 = "someSalt";
+            var salt_2 = "someSaltSomeSalt";
 
             // Act
-            var hashedPassword1 = PasswordHasher.HashPassword(password, salt_1_AsBase64String);
-            var hashedPassword2 = PasswordHasher.HashPassword(password, salt_2_AsBase64String);
+            var hashedPassword1 = PasswordHasher.HashPassword(password, salt_1);
+            var hashedPassword2 = PasswordHasher.HashPassword(password, salt_2);
 
             // Assert
             Assert.NotEqual(hashedPassword1, hashedPassword2);

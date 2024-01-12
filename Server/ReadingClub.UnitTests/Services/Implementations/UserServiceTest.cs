@@ -2,7 +2,6 @@
 using Moq;
 using ReadingClub.Domain;
 using ReadingClub.Infrastructure.Common.Helpers;
-using ReadingClub.Infrastructure.DTO.Book;
 using ReadingClub.Infrastructure.DTO.User;
 using ReadingClub.Infrastructure.Profile;
 using ReadingClub.Repositories.Interfaces;
@@ -101,9 +100,6 @@ namespace ReadingClub.UnitTests.Services.Implementations
 
             _mockUserRepository.Setup(repo => repo.GetUserIdByEmail(anonymousUser))
                 .ReturnsAsync(anonymousUserId);
-
-            //_mockBookRepository.Setup(repo => repo.ClearBooksForUserBeforeDelete(It.IsAny<string>(), anonymousUserId));
-            //_mockUserRepository.Setup(repo => repo.Delete(It.IsAny<string>()));
 
             // Act
             var result = _userService.Delete("someEmail@test.com");
