@@ -63,7 +63,7 @@ namespace ReadingClub.Repositories.Implementations
                 _ => "b.title"
             };
 
-            var orderDirection = pagedRequest.OrderDirection == "dsc" ? "DESC" : "ASC";
+            var orderDirection = pagedRequest.OrderDirection == "Descending" ? "DESC" : "ASC";
 
             // ignore isbn when it is empty in request. Other fields are not null
             var isbnFilterSql = string.IsNullOrEmpty(pagedRequest.Filters["isbn"]) ? "" : " AND isbn LIKE @isbnFilterParam";

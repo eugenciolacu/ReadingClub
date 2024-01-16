@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ReadingClub.FilesForTesting\ReadingClub.FilesForTesting.csproj" />
     <ProjectReference Include="..\ReadingClub\ReadingClub.csproj" />
   </ItemGroup>
 

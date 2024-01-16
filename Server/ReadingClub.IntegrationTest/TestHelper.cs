@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using ReadingClub.Domain;
 using ReadingClub.Infrastructure.Common.Helpers;
+using ReadingClub.Infrastructure.DTO.Book;
 using ReadingClub.Infrastructure.DTO.User;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -15,24 +16,130 @@ namespace ReadingClub.IntegrationTest
     {
         public static string OriginalPassword { get; } = "password";
 
-        //public static async Task<Book> AddNewBookToTestDatabase(int addedByUserId)
-        //{
-        //    var configuration = new ConfigurationBuilder()
-        //        .SetBasePath(Directory.GetCurrentDirectory())
-        //        .AddJsonFile("appsettings.Test.json")
-        //        .Build();
+        public static async Task<Book> AddNewBookToTestDatabaseThenToReadingListOfSpecificUser(int addedByUserId, int specificUserId)
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.Test.json")
+                .Build();
 
-        //    string someGuidAsRandomValue = Guid.NewGuid().ToString();
+            var connectionString = configuration["ConnectionString"]!;
 
-        //    Book book = new Book()
-        //    {
-        //        Title = "Title" + someGuidAsRandomValue,
-        //        Authors = "Authors" + someGuidAsRandomValue,
-        //        ISBN = "ISBN" + someGuidAsRandomValue,
-        //        Description = "Description" + someGuidAsRandomValue,
+            string someGuidAsRandomValue = Guid.NewGuid().ToString();
 
-        //    };
-        //}
+            Book book = new Book()
+            {
+                Title = "Title" + someGuidAsRandomValue,
+                Authors = "Authors" + someGuidAsRandomValue,
+                ISBN = "ISBN" + someGuidAsRandomValue,
+                Description = "Description" + someGuidAsRandomValue,
+                Cover = Convert.FromBase64String(FilesForTesting.Files.CoverAsBase64WithoutMeme),
+                CoverName = "CoverName" + someGuidAsRandomValue,
+                CoverMime = FilesForTesting.Files.CoverAsBase64Meme,
+                File = Convert.FromBase64String(FilesForTesting.Files.FileAsBase64WithoutMeme),
+                FileName = "FileName" + someGuidAsRandomValue,
+                AddedBy = addedByUserId
+            };
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                var sqlQueryInsertBook =
+                    $@"INSERT INTO books (title, authors, isbn, description, cover, coverName, coverMime, file, fileName, addedBy)
+                        values(@Title, @Authors, @ISBN, @Description, @Cover, @CoverName, @CoverMime, @File, @FileName, @AddedBy);
+                    SELECT last_insert_rowid();";
+                var queryResult = await connection.QueryAsync<int>(sqlQueryInsertBook, book);
+                int? bookId = queryResult.FirstOrDefault();
+                book.Id = (int)bookId;
+
+                var sqlQueryInsertInUsersBooks =
+                    $@"INSERT INTO usersBooks (isRead, userId, bookId) 
+                    VALUES (
+                        0, 
+                        {specificUserId}, 
+                        {book.Id});";
+                await connection.ExecuteAsync(sqlQueryInsertInUsersBooks);
+            }
+
+            return book;
+        }
+
+        public static async Task<Book> AddNewBookOfSpecificAuthorToTestDatabase(int addedByUserId, string authors)
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.Test.json")
+                .Build();
+
+            var connectionString = configuration["ConnectionString"]!;
+
+            string someGuidAsRandomValue = Guid.NewGuid().ToString();
+
+            Book book = new Book()
+            {
+                Title = "Title" + someGuidAsRandomValue,
+                Authors = "Authors" + authors,
+                ISBN = "ISBN" + someGuidAsRandomValue,
+                Description = "Description" + someGuidAsRandomValue,
+                Cover = Convert.FromBase64String(FilesForTesting.Files.CoverAsBase64WithoutMeme),
+                CoverName = "CoverName" + someGuidAsRandomValue,
+                CoverMime = FilesForTesting.Files.CoverAsBase64Meme,
+                File = Convert.FromBase64String(FilesForTesting.Files.FileAsBase64WithoutMeme),
+                FileName = "FileName" + someGuidAsRandomValue,
+                AddedBy = addedByUserId
+            };
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                var sqlQueryInsert =
+                    $@"INSERT INTO books (title, authors, isbn, description, cover, coverName, coverMime, file, fileName, addedBy)
+                        values(@Title, @Authors, @ISBN, @Description, @Cover, @CoverName, @CoverMime, @File, @FileName, @AddedBy);
+                    SELECT last_insert_rowid();";
+                var queryResult = await connection.QueryAsync<int>(sqlQueryInsert, book);
+                int? bookId = queryResult.FirstOrDefault();
+                book.Id = (int)bookId;
+            }
+
+            return book;
+        }
+
+        public static async Task<Book> AddNewBookToTestDatabase(int addedByUserId)
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.Test.json")
+                .Build();
+
+            var connectionString = configuration["ConnectionString"]!;
+
+            string someGuidAsRandomValue = Guid.NewGuid().ToString();
+
+            Book book = new Book()
+            {
+                Title = "Title" + someGuidAsRandomValue,
+                Authors = "Authors" + someGuidAsRandomValue,
+                ISBN = "ISBN" + someGuidAsRandomValue,
+                Description = "Description" + someGuidAsRandomValue,
+                Cover = Convert.FromBase64String(FilesForTesting.Files.CoverAsBase64WithoutMeme),
+                CoverName = "CoverName" + someGuidAsRandomValue,
+                CoverMime = FilesForTesting.Files.CoverAsBase64Meme,
+                File = Convert.FromBase64String(FilesForTesting.Files.FileAsBase64WithoutMeme),
+                FileName = "FileName" + someGuidAsRandomValue,
+                AddedBy = addedByUserId
+            };
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                var sqlQueryInsert =
+                    $@"INSERT INTO books (title, authors, isbn, description, cover, coverName, coverMime, file, fileName, addedBy)
+                        values(@Title, @Authors, @ISBN, @Description, @Cover, @CoverName, @CoverMime, @File, @FileName, @AddedBy);
+                    SELECT last_insert_rowid();";
+                var queryResult = await connection.QueryAsync<int>(sqlQueryInsert, book);
+                int? bookId = queryResult.FirstOrDefault();
+                book.Id = (int)bookId;
+            }
+
+            return book;
+        }
 
         public static async Task<User> AddNewUserToTestDatabase()
         {
@@ -48,8 +155,8 @@ namespace ReadingClub.IntegrationTest
 
             User user = new User()
             {
-                UserName = someGuidAsRandomValue,
-                Email = someGuidAsRandomValue + "@test.com",
+                UserName = "user" + someGuidAsRandomValue,
+                Email = "user" + someGuidAsRandomValue + "@test.com",
                 Password = hashedPassword,
                 Salt = "someSalt"
             };
