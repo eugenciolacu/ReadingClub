@@ -353,15 +353,301 @@ namespace ReadingClub.IntegrationTest.Controllers
         #endregion
 
         #region Create
+        [Fact]
+        public async Task Create_WithInvalidInput_ReturnsBadRequest()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
 
+            string? token = TestHelper.GenerateToken(new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            });
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            CreateBookDto createBookDto = new CreateBookDto();
+
+            string json = JsonConvert.SerializeObject(createBookDto);
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/Book/create", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result,
+                new { errors = (Dictionary<string, string[]>)null! });
+            Assert.Equal(5, resultContent?.errors.Count);
+            Assert.Equal("The Title field is required.", resultContent?.errors["Title"][0]);
+            Assert.Equal("The Authors field is required.", resultContent?.errors["Authors"][0]);
+            Assert.Equal("The File field is required.", resultContent?.errors["File"][0]);
+            Assert.Equal("The FileName field is required.", resultContent?.errors["FileName"][0]);
+            Assert.Equal("The AddedByEmail field is required.", resultContent?.errors["AddedByEmail"][0]);
+        }
+
+        [Fact]
+        public async Task Create_WithValidInput_ReturnsBookDto()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            string? token = TestHelper.GenerateToken(new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            });
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            string someGuidAsRandomValue = Guid.NewGuid().ToString();
+
+            CreateBookDto createBookDto = new CreateBookDto()
+            {
+                Title = "Title " + someGuidAsRandomValue,
+                Authors = "Authors " + someGuidAsRandomValue,
+                ISBN = "ISBN " + someGuidAsRandomValue,
+                Description = "Description " + someGuidAsRandomValue,
+                Cover = FilesForTesting.Files.CoverAsBase64WithMeme,
+                CoverName = "CoverName " + someGuidAsRandomValue,
+                File = FilesForTesting.Files.FileAsBase64WithMeme,
+                FileName = "FileName " + someGuidAsRandomValue,
+                AddedByEmail = user.Email
+            };
+
+            string json = JsonConvert.SerializeObject(createBookDto);
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/Book/create", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (BookDto)null! });
+
+            Assert.True(resultContent?.Status);
+            Assert.Equal(createBookDto.Title, resultContent?.Data.Title);
+            Assert.Equal(createBookDto.Authors, resultContent?.Data.Authors);
+            Assert.Equal(createBookDto.ISBN, resultContent?.Data.ISBN);
+            Assert.Equal(createBookDto.Description, resultContent?.Data.Description);
+            Assert.Equal(FilesForTesting.Files.CoverAsBase64WithoutMeme, resultContent?.Data.Cover);
+            Assert.Equal(FilesForTesting.Files.CoverAsBase64Meme, resultContent?.Data.CoverMime);
+            Assert.Equal(createBookDto.CoverName, resultContent?.Data.CoverName);
+            Assert.Equal(createBookDto.FileName, resultContent?.Data.FileName);
+            Assert.Equal(user.UserName, resultContent?.Data.AddedByUserName);
+            Assert.False(resultContent?.Data.IsInReadingList);
+            Assert.False(resultContent?.Data.IsRead);
+        }
         #endregion
 
         #region Update
+        [Fact]
+        public async Task Update_WithInvalidInput_ReturnsBadRequest()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
 
+            string? token = TestHelper.GenerateToken(new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            });
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            UpdateBookDto updateBookDto = new UpdateBookDto();
+
+            string json = JsonConvert.SerializeObject(updateBookDto);
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PutAsync("/api/Book/update", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result,
+                new { errors = (Dictionary<string, string[]>)null! });
+            Assert.Equal(4, resultContent?.errors.Count);
+            Assert.Equal("The Title field is required.", resultContent?.errors["Title"][0]);
+            Assert.Equal("The Authors field is required.", resultContent?.errors["Authors"][0]);
+            Assert.Equal("The File field is required.", resultContent?.errors["File"][0]);
+            Assert.Equal("The FileName field is required.", resultContent?.errors["FileName"][0]);
+        }
+
+        [Fact]
+        public async Task Update_WithInvalidInput_ReturnsErrorResponse()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            string? token = TestHelper.GenerateToken(new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            });
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            Book book = await TestHelper.AddNewBookToTestDatabase(user.Id);
+
+            UpdateBookDto updateBookDto = new UpdateBookDto()
+            {
+                Id = -1,
+                Title = book.Title,
+                Authors = book.Authors,
+                ISBN = book.ISBN,
+                Description = book.Description,
+                Cover = Convert.ToBase64String(book.Cover!),
+                CoverName = book.CoverName,
+                IsCoverEdited = true,
+                File = Convert.ToBase64String(book.File!),
+                FileName = book.FileName,
+                IsFileEdited = true
+            };
+
+            string json = JsonConvert.SerializeObject(updateBookDto);
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PutAsync("/api/Book/update", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Message = (string)null! });
+
+            Assert.False(resultContent?.Status);
+            Assert.Equal("An error occurred during processing, book not found.", resultContent?.Message);
+        }
+
+        [Fact]
+        public async Task Update_WithValidInput_ReturnsBookDto()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            string? token = TestHelper.GenerateToken(new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            });
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            Book book = await TestHelper.AddNewBookToTestDatabase(user.Id);
+
+            UpdateBookDto updateBookDto = new UpdateBookDto()
+            {
+                Id = book.Id,
+                Title = "Updated " + book.Title,
+                Authors = "Updated " + book.Authors,
+                ISBN = "Updated " + book.ISBN,
+                Description = "Updated " + book.Description,
+                Cover = FilesForTesting.Files.CoverAsBase64WithMeme,
+                CoverName = "Updated " + book.CoverName,
+                IsCoverEdited = true,
+                File = FilesForTesting.Files.FileAsBase64WithMeme,
+                FileName = "Updated " + book.FileName,
+                IsFileEdited = true
+            };
+
+            string json = JsonConvert.SerializeObject(updateBookDto);
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PutAsync("/api/Book/update", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (BookDto)null! });
+
+            Assert.True(resultContent?.Status);
+            Assert.Equal(updateBookDto.Id, resultContent?.Data.Id);
+            Assert.Equal(updateBookDto.Title, resultContent?.Data.Title);
+            Assert.Equal(updateBookDto.Authors, resultContent?.Data.Authors);
+            Assert.Equal(updateBookDto.ISBN, resultContent?.Data.ISBN);
+            Assert.Equal(updateBookDto.Description, resultContent?.Data.Description);
+            Assert.Equal(updateBookDto.CoverName, resultContent?.Data.CoverName);
+            Assert.Equal(updateBookDto.FileName, resultContent?.Data.FileName);
+            Assert.Equal(user.UserName, resultContent?.Data.AddedByUserName);
+
+            // in front-end cover is computed as << this.book.coverMime + ',' + this.book.cover >>
+            // so updateBookDto.Cover will contain cover and ',' symbol
+            // so these have to be removed before assert
+            int startIndex = updateBookDto.Cover.IndexOf(",");
+            string coverWithoutMime = updateBookDto.Cover.Substring(startIndex + 1);
+            Assert.Equal(coverWithoutMime, resultContent?.Data.Cover);
+
+            // file are not retrieved as part of BookDto
+        }
         #endregion
 
         #region Delete
+        [Fact]
+        public async Task Delete_WithInvalidInput_ReturnsErrorMessage()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
 
+            string? token = TestHelper.GenerateToken(new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            });
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Act
+            var response = await _httpClient.DeleteAsync("/api/Book/delete/0");
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Message = (string)null! });
+
+            Assert.False(resultContent?.Status);
+            Assert.Equal("An error occurred during processing, book not found.", resultContent?.Message);
+        }
+
+        [Fact]
+        public async Task Delete_WithValidInput_ReturnsBookWithAnonymousAddedByUserName()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            string? token = TestHelper.GenerateToken(new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            });
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            Book book = await TestHelper.AddNewBookToTestDatabase(user.Id);
+            // Act
+            var response = await _httpClient.DeleteAsync($"/api/Book/delete/{book.Id}");
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (BookDto)null! });
+
+            Assert.True(resultContent?.Status);
+            Assert.Equal(book.Id, resultContent?.Data.Id);
+            Assert.Equal("anonymous", resultContent?.Data.AddedByUserName);
+        }
         #endregion
 
         #region AddToReadingList

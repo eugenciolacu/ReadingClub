@@ -41,6 +41,11 @@ namespace ReadingClub.Services.Implementations
 
             var book = await _bookRepository.Get(id);
 
+            if (book == null)
+            {
+                return null!;
+            }
+
             book.AddedBy = anonymousUserId;
 
             var updatedBook = await _bookRepository.DeleteUpdate(book);

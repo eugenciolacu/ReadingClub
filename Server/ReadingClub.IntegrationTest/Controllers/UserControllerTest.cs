@@ -39,7 +39,7 @@ namespace ReadingClub.IntegrationTest.Controllers
 
             var resultContentWhenEmptyFields = JsonConvert.DeserializeAnonymousType(resultWhenEmptyFields,
                 new { errors = (Dictionary<string, string[]>)null! });
-            Assert.Equal(4, resultContentWhenEmptyFields!.errors.Count);
+            Assert.Equal(4, resultContentWhenEmptyFields?.errors.Count);
             Assert.Equal("The User name field is required.", resultContentWhenEmptyFields?.errors["UserName"][0]);
             Assert.Equal("The Email address is required.", resultContentWhenEmptyFields?.errors["Email"][0]);
             Assert.Equal("Invalid Email address.", resultContentWhenEmptyFields?.errors["Email"][1]);

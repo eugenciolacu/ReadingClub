@@ -135,6 +135,27 @@ namespace ReadingClub.UnitTests.Services.Implementations
 
         #region Delete
         [Fact]
+        public void Delete_WithInvalidInput_ReturnsNull()
+        {
+            // Arrange
+            var addedBy = 1; // anonymous user have Id = 1
+            Book book = null!;
+
+            _mockUserRepository.Setup(repo => repo.GetUserIdByEmail(It.IsAny<string>()))
+                .ReturnsAsync(addedBy);
+
+            _mockBookRepository.Setup(repo => repo.Get(It.IsAny<int>()))
+                .ReturnsAsync(book);
+
+            // Act
+            var result = _bookService.Delete(0);
+
+            // Assert
+            Assert.IsType<Task<BookDto>>(result);
+            Assert.Null(result.Result);
+        }
+
+        [Fact]
         public void Delete_WithValidInput_ReturnsBookDto()
         {
             // Arrange
