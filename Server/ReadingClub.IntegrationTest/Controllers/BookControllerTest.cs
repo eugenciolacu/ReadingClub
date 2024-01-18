@@ -6,6 +6,7 @@ using ReadingClub.Infrastructure.DTO.Book;
 using ReadingClub.Infrastructure.DTO.User;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 
 namespace ReadingClub.IntegrationTest.Controllers
@@ -651,11 +652,145 @@ namespace ReadingClub.IntegrationTest.Controllers
         #endregion
 
         #region AddToReadingList
+        [Fact]
+        public async Task AddToReadingList_WithInvalidInput_ReturnsErrorHandlingMiddlewareErrorResponse()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
 
+            string? token = TestHelper.GenerateToken(new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            });
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            Book book = await TestHelper.AddNewBookToTestDatabase(user.Id);
+
+            BookToReadingListDto bookToReadingListDto = new BookToReadingListDto("someInexistentEmail@test.com", -1);
+
+            string json = JsonConvert.SerializeObject(bookToReadingListDto);
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/Book/addToReadingList", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { status = false, message = (string)null! });
+
+            Assert.False(resultContent?.status);
+            Assert.Equal("An unexpected error occurred during processing.", resultContent?.message);
+        }
+
+        [Fact]
+        public async Task AddToReadingList_WithValidInput_ReturnsSuccess()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            string? token = TestHelper.GenerateToken(new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            });
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            Book book = await TestHelper.AddNewBookToTestDatabase(user.Id);
+
+            BookToReadingListDto bookToReadingListDto = new BookToReadingListDto(user.Email, book.Id);
+
+            string json = JsonConvert.SerializeObject(bookToReadingListDto);
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/Book/addToReadingList", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false });
+
+            Assert.True(resultContent?.Status);
+
+            Assert.True(await TestHelper.IsBookInReadingListOfUser(book.Id, user.Id));
+        }
         #endregion
 
         #region RemoveFromReadingList
+        [Fact]
+        public async Task RemoveFromReadingList_WithInvalidInput_ReturnsErrorHandlingMiddlewareErrorResponse()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
 
+            string? token = TestHelper.GenerateToken(new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            });
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            BookToReadingListDto bookToReadingListDto = new BookToReadingListDto("someInexistentEmail@test.com", -1);
+
+            string json = JsonConvert.SerializeObject(bookToReadingListDto);
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/Book/addToReadingList", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { status = false, message = (string)null! });
+
+            Assert.False(resultContent?.status);
+            Assert.Equal("An unexpected error occurred during processing.", resultContent?.message);
+        }
+
+        [Fact]
+        public async Task RemoveFromReadingList_WithValidInput_ReturnsActionResult()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            string? token = TestHelper.GenerateToken(new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            });
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            User userToAddBook = await TestHelper.AddNewUserToTestDatabase();
+            Book bookToRemoveFromReadingList = await TestHelper.AddNewBookToTestDatabaseThenToReadingListOfSpecificUser(userToAddBook.Id, user.Id);
+
+            BookToReadingListDto bookToReadingListDto = new BookToReadingListDto(user.Email, bookToRemoveFromReadingList.Id);
+
+            string json = JsonConvert.SerializeObject(bookToReadingListDto);
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/Book/removeFromReadingList", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false });
+
+            Assert.True(resultContent?.Status);
+
+            Assert.False(await TestHelper.IsBookInReadingListOfUser(bookToRemoveFromReadingList.Id, user.Id));
+
+        }
         #endregion
 
         #region MarkAsReadOrUnread
