@@ -16,6 +16,25 @@ namespace ReadingClub.IntegrationTest
     {
         public static string OriginalPassword { get; } = "password";
 
+        public static async Task<bool> IsBookInReadingListOfUserRead(int bookId, int userId)
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.Test.json")
+                .Build();
+
+            var connectionString = configuration["ConnectionString"]!;
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                var sqlQuery =
+                    @"SELECT isRead FROM usersBooks WHERE userId = @userId AND bookId = @bookId";
+                var queryResult = await connection.QueryAsync<int>(sqlQuery, new { userId, bookId });
+
+                return queryResult.FirstOrDefault() == 1;
+            }
+        }
+
         public static async Task<bool> IsBookInReadingListOfUser(int bookId, int userId)
         {
             var configuration = new ConfigurationBuilder()

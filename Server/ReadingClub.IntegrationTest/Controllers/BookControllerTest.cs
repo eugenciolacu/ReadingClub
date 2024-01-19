@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using ReadingClub.Domain;
 using ReadingClub.Infrastructure.Common.Paging;
+using ReadingClub.Infrastructure.DTO;
 using ReadingClub.Infrastructure.DTO.Book;
 using ReadingClub.Infrastructure.DTO.User;
 using System.Net;
@@ -756,7 +757,7 @@ namespace ReadingClub.IntegrationTest.Controllers
         }
 
         [Fact]
-        public async Task RemoveFromReadingList_WithValidInput_ReturnsActionResult()
+        public async Task RemoveFromReadingList_WithValidInput_ReturnsSuccess()
         {
             // Arrange
             User user = await TestHelper.AddNewUserToTestDatabase();
@@ -794,15 +795,182 @@ namespace ReadingClub.IntegrationTest.Controllers
         #endregion
 
         #region MarkAsReadOrUnread
+        [Fact]
+        public async Task MarkAsReadOrUnread_WithValidInput_ReturnsSuccess()
+        {
+            // Arrange, book is read 
+            User user = await TestHelper.AddNewUserToTestDatabase();
 
+            string? token = TestHelper.GenerateToken(new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            });
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            User userToAddBook = await TestHelper.AddNewUserToTestDatabase();
+            Book bookToMarkAsRead = await TestHelper.AddNewBookToTestDatabaseThenToReadingListOfSpecificUser(userToAddBook.Id, user.Id);
+
+            BookToReadingListDto bookToReadingListDto = new BookToReadingListDto(user.Email, bookToMarkAsRead.Id, true);
+
+            string json = JsonConvert.SerializeObject(bookToReadingListDto);
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync("/api/Book/markAsReadOrUnread", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false });
+
+            Assert.True(resultContent?.Status);
+
+            Assert.True(await TestHelper.IsBookInReadingListOfUserRead(bookToMarkAsRead.Id, user.Id));
+
+            // Arrange, book is not read 
+            bookToReadingListDto = new BookToReadingListDto(user.Email, bookToMarkAsRead.Id, false);
+
+            json = JsonConvert.SerializeObject(bookToReadingListDto);
+            content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            response = await _httpClient.PostAsync("/api/Book/markAsReadOrUnread", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            result = await response.Content.ReadAsStringAsync();
+
+            resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false });
+
+            Assert.True(resultContent?.Status);
+
+            Assert.False(await TestHelper.IsBookInReadingListOfUserRead(bookToMarkAsRead.Id, user.Id));
+        }
         #endregion
 
         #region GetStatistics
+        [Fact]
+        public async Task GetStatistics_WithValidInput_ReturnsBookStatisticsDto()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
 
+            string? token = TestHelper.GenerateToken(new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            });
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            await TestHelper.AddNewBookToTestDatabase(user.Id);
+            await TestHelper.AddNewBookToTestDatabase(user.Id);
+            await TestHelper.AddNewBookToTestDatabaseThenToReadingListOfSpecificUser(user.Id, user.Id);
+
+            UserEmailDto userEmailDto = new UserEmailDto()
+            {
+                UserEmail = user.Email
+            };
+
+            var json = JsonConvert.SerializeObject(userEmailDto);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync($"/api/Book/getStatistics", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (BookStatisticsDto)null! });
+
+            Assert.True(resultContent?.Status);
+            Assert.True(resultContent?.Data.TotalBooks >= 3);
+            Assert.True(resultContent?.Data.UploadedByUser == 3);
+            Assert.True(resultContent?.Data.InUserReadingList == 1);
+            Assert.True(resultContent?.Data.ReadByUser == 0);
+        }
         #endregion
 
         #region GetBookForDownload
+        [Fact]
+        public async Task GetBookForDownload_WithInvalidInput_ReturnsErrorResponse()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
 
+            string? token = TestHelper.GenerateToken(new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            });
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            Book book = await TestHelper.AddNewBookToTestDatabase(user.Id);
+
+            BookToStringFileDto bookToStringFileDto = new BookToStringFileDto()
+            {
+                Id = -1
+            };
+
+            var json = JsonConvert.SerializeObject(bookToStringFileDto);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync($"/api/Book/getBookForDownload", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Message = (string)null! });
+
+            Assert.False(resultContent?.Status);
+            Assert.Equal("An error occurred during processing, book not found.", resultContent?.Message);
+        }
+
+        [Fact]
+        public async Task GetBookForDownload_WithValidInput_ReturnsActionResult()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            string? token = TestHelper.GenerateToken(new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            });
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            Book book = await TestHelper.AddNewBookToTestDatabase(user.Id);
+
+            BookToStringFileDto bookToStringFileDto = new BookToStringFileDto()
+            {
+                Id = book.Id
+            };
+
+            var json = JsonConvert.SerializeObject(bookToStringFileDto);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _httpClient.PostAsync($"/api/Book/getBookForDownload", content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (string)null! });
+
+            Assert.True(resultContent?.Status);
+            Assert.Equal(Convert.ToBase64String(book.File), resultContent?.Data);
+            Assert.Equal(FilesForTesting.Files.FileAsBase64WithoutMeme, resultContent?.Data);
+        }
         #endregion
 
         public void Dispose()

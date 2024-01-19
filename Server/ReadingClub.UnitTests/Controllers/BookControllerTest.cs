@@ -494,7 +494,7 @@ namespace ReadingClub.UnitTests.Controllers
             Assert.True(TestHelper.IsAttributePresent(_controller, "GetBookForDownload", typeof(HttpPostAttribute)));
 
         [Fact]
-        public void GetBookForDownload_WithValidInput_ReturnsErrorResponse()
+        public void GetBookForDownload_WithInvalidInput_ReturnsErrorResponse()
         {
             // Arrange
             string? book = null;
