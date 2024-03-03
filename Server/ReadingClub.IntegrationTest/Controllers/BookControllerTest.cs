@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using ReadingClub.Domain;
 using ReadingClub.Infrastructure.Common.Paging;
 using ReadingClub.Infrastructure.DTO;
@@ -7,7 +6,6 @@ using ReadingClub.Infrastructure.DTO.Book;
 using ReadingClub.Infrastructure.DTO.User;
 using System.Net;
 using System.Net.Http.Headers;
-using System.Runtime.Intrinsics.X86;
 using System.Text;
 
 namespace ReadingClub.IntegrationTest.Controllers
