@@ -1,13 +1,12 @@
-using Microsoft.AspNetCore.Authentication;
+using Gherkin;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using ReadingClub.Domain;
 using ReadingClub.Infrastructure.DTO.User;
 using ReadingClub.SpecFlow.Support;
 using ReadingClub.SpecFlow.Support.Utilities;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
-using TechTalk.SpecFlow.CommonModels;
 
 namespace ReadingClub.SpecFlow.StepDefinitions
 {
@@ -21,6 +20,9 @@ namespace ReadingClub.SpecFlow.StepDefinitions
         private UserLoginDto _userLoginDto = null!;
         private HttpContent _content = null!;
         private HttpResponseMessage _response = null!;
+        private string? _token = null!;
+        private TokenDto _tokenDto = null!;
+        private UserDto _userDto = null!;
 
         public IntegrationTestsForUserControllerClassStepDefinitions()
         {
@@ -142,6 +144,83 @@ namespace ReadingClub.SpecFlow.StepDefinitions
             };
         }
 
+        [Given(@"a token generated based on an UserDto object with empty fields")]
+        public void GivenATokenGeneratedBasedOnAnUserDtoObjectWithEmptyFields()
+        {
+            UserDto userDto = new UserDto()
+            {
+                UserName = "",
+                Email = ""
+            };
+
+            _token = TestHelper.GenerateToken(userDto);
+        }
+
+        [Given(@"create HttpContent for isTokenValid")]
+        public void GivenCreateHttpContentForIsTokenValid()
+        {
+            string json = JsonConvert.SerializeObject(new TokenDto() { Token = _token! });
+            _content = new StringContent(json, Encoding.UTF8, "application/json");
+        }
+
+        [Given(@"a token generated based on a valid UserDto that exists in database")]
+        public async Task GivenATokenGeneratedBasedOnAValidUserDtoThatExistsInDatabaseAsync()
+        {
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            _userDto = new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            };
+
+            _token = TestHelper.GenerateToken(_userDto);
+        }
+
+        [Given(@"a token generated based on a valid UserDto that exists in database but with expiration less than a day")]
+        public async Task GivenATokenGeneratedBasedOnAValidUserDtoThatExistsInDatabaseButWithExpirationLessThanADayAsync()
+        {
+            // Arrange
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            _userDto = new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            };
+
+            _token = TestHelper.GenerateTokenThithExpirationOfLessThanADay(_userDto);
+        }
+
+        [Given(@"a token generated based on a valid UserDto that exists in database but with expiration more than a day")]
+        public async Task GivenATokenGeneratedBasedOnAValidUserDtoThatExistsInDatabaseButWithExpirationMoreThanADayAsync()
+        {
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            _userDto = new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            };
+
+            _token = TestHelper.GenerateTokenThithExpirationOfMoreThanADay(_userDto);
+        }
+
+        [Given(@"an altered token")]
+        public async Task GivenAnAlteredTokenAsync()
+        {
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            _userDto = new UserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+            };
+
+            _token = TestHelper.GenerateAlteredToken(_userDto);
+        }
+
+
         [When(@"try create an account")]
         public async Task WhenTryCreateAnAccount()
         {
@@ -152,6 +231,12 @@ namespace ReadingClub.SpecFlow.StepDefinitions
         public async Task WhenTryLoginAsync()
         {
             _response = await _httpClient.PostAsync("/api/User/login", _content);
+        }
+
+        [When("try validate token")]
+        public async Task WhenTryValidateTokenAsync()
+        {
+            _response = await _httpClient.PostAsync("/api/User/isTokenValid", _content);
         }
 
         [Then(@"an HttpStatusCode\.OK is returned")]
@@ -254,6 +339,46 @@ namespace ReadingClub.SpecFlow.StepDefinitions
             Assert.Equal(table.Rows[0]["Status"], resultContent?.Status.ToString());
             Assert.Equal(table.Rows[0]["Message"], resultContent?.Message);
         }
+
+        [Then("following details of error for isTokenValid are")]
+        public async Task ThenFollowingDetailsOfErrorForIsTokenValidAreAsync(Table table)
+        {
+            var result = await _response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Message = (string)null! });
+
+            Assert.Equal(table.Rows[0]["Status"], resultContent?.Status.ToString());
+            Assert.Equal(table.Rows[0]["Message"], resultContent?.Message);
+        }
+
+        [Then("returned token is the same, not-null and not-empty")]
+        public async Task ThenReturnedTokenIsTheSameNot_NullAndNot_EmptyAsync()
+        {
+            var result = await _response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (string)null! });
+
+            Assert.True(resultContent?.Status);
+            Assert.NotNull(resultContent?.Data);
+            Assert.NotEmpty(resultContent?.Data);
+            Assert.Equal(_token, resultContent?.Data);
+        }
+
+        [Then(@"return a new token with updated expiration date, not-null and not-empty")]
+        public async Task ThenReturnANewTokenWithUpdatedExpirationDateNot_NullAndNot_Empty()
+        {
+            var result = await _response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (string)null! });
+
+            Assert.True(resultContent?.Status);
+            Assert.NotNull(resultContent?.Data);
+            Assert.NotEmpty(resultContent?.Data);
+            Assert.NotEqual(_token, resultContent?.Data);
+        }
+
+
+
 
 
 

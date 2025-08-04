@@ -100,3 +100,48 @@ Scenario: Anonymous user try login with inexistend credentials
 
 
 
+Scenario: Is token valid when an invalid TokenDto is provided
+	Validate token when TokenDto parameter is generated based on an UserDto object with empty fields
+	Given a token generated based on an UserDto object with empty fields
+	And create HttpContent for isTokenValid
+	When try validate token
+	Then an HttpStatusCode.OK is returned
+	And following details of error for isTokenValid are
+		| Status | Message                                  |
+		| False  | Token validation failed, user not found. |
+
+Scenario: Is token valid when an valid TokenDto is provided
+	Validate token when TokenDto parameter is generated based on an valid UserDto, user exists in database
+	Given a token generated based on a valid UserDto that exists in database
+	And create HttpContent for isTokenValid
+	When try validate token
+	Then an HttpStatusCode.OK is returned
+	And returned token is the same, not-null and not-empty
+
+Scenario: Is token valid when an valid TokenTdo is provided, token expiration less than a day
+	Validate token when TokenDto parameter is generated based on an valid UserDto, user exists in database, but expiration is less than a day
+	Given a token generated based on a valid UserDto that exists in database but with expiration less than a day
+	And create HttpContent for isTokenValid
+	When try validate token
+	Then an HttpStatusCode.OK is returned
+	And return a new token with updated expiration date, not-null and not-empty
+
+Scenario: Is token valid when an valid TokenDto is provided, token expiration more than a day
+	Validate token when TokenDto parameter is generated based on an valid UserDto, user exists in database, but expiration is more than a day
+	Given a token generated based on a valid UserDto that exists in database but with expiration more than a day
+	And create HttpContent for isTokenValid
+	When try validate token
+	Then an HttpStatusCode.OK is returned
+	And following details of error for isTokenValid are
+		| Status | Message                  |
+		| False  | Token validation failed. |
+
+Scenario: Is token valid when an altered TokenDto is provided
+	Validate token when TokenDto parameter is altered
+	Given an altered token
+	And create HttpContent for isTokenValid
+	When try validate token
+	Then an HttpStatusCode.OK is returned
+	And following details of error for isTokenValid are
+		| Status | Message                  |
+		| False  | Token validation failed. |

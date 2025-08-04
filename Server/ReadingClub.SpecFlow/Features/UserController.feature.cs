@@ -449,7 +449,7 @@ this.ScenarioInitialize(scenarioInfo);
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Anonymous user try login with empty DTO", "\tAn anonymous user try to ligin with empty DTO", tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 70
+#line 71
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -469,16 +469,16 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 72
+#line 73
  testRunner.Given("an empty UserLoginDto", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 73
+#line 74
  testRunner.And("create HttpContent for login request", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 74
+#line 75
  testRunner.When("try login", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 75
+#line 76
  testRunner.Then("an HttpStatusCode.BadRequest is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
                 TechTalk.SpecFlow.Table table9 = new TechTalk.SpecFlow.Table(new string[] {
@@ -489,7 +489,7 @@ this.ScenarioInitialize(scenarioInfo);
                             "2",
                             "The Email field is required.",
                             "The Password field is required."});
-#line 76
+#line 77
  testRunner.And("the following details of errors for login are", ((string)(null)), table9, "And ");
 #line hidden
             }
@@ -504,7 +504,7 @@ this.ScenarioInitialize(scenarioInfo);
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Anonymous user login", "\tAn anonymous user login with valid credentials, user must be in database", tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 80
+#line 81
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -524,19 +524,19 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 82
+#line 83
  testRunner.Given("a valid user in database login with its credentials", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 83
+#line 84
  testRunner.And("create HttpContent for login request", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 84
+#line 85
  testRunner.When("try login", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 85
+#line 86
  testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
-#line 86
+#line 87
  testRunner.And("a non-null and non-empty token is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
             }
@@ -551,7 +551,7 @@ this.ScenarioInitialize(scenarioInfo);
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Anonymous user try login with inexistend credentials", "\tAn anonymous user try login with inexistent credentials", tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 88
+#line 89
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -571,16 +571,16 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 90
+#line 91
  testRunner.Given("invalid credentials in UserLoginDto", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 91
+#line 92
  testRunner.And("create HttpContent for login request", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 92
+#line 93
  testRunner.When("try login", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 93
+#line 94
  testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
                 TechTalk.SpecFlow.Table table10 = new TechTalk.SpecFlow.Table(new string[] {
@@ -589,8 +589,273 @@ this.ScenarioInitialize(scenarioInfo);
                 table10.AddRow(new string[] {
                             "False",
                             "User do not exists or password is incorrect."});
-#line 94
+#line 95
  testRunner.And("the following details of errors for login with inexistent credentials are", ((string)(null)), table10, "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Is token valid when an invalid TokenDto is provided")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Is token valid when an invalid TokenDto is provided")]
+        public virtual void IsTokenValidWhenAnInvalidTokenDtoIsProvided()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Is token valid when an invalid TokenDto is provided", "\tValidate token when TokenDto parameter is generated based on an UserDto object w" +
+                    "ith empty fields", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 103
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 105
+ testRunner.Given("a token generated based on an UserDto object with empty fields", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 106
+ testRunner.And("create HttpContent for isTokenValid", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 107
+ testRunner.When("try validate token", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 108
+ testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table11 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Status",
+                            "Message"});
+                table11.AddRow(new string[] {
+                            "False",
+                            "Token validation failed, user not found."});
+#line 109
+ testRunner.And("following details of error for isTokenValid are", ((string)(null)), table11, "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Is token valid when an valid TokenDto is provided")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Is token valid when an valid TokenDto is provided")]
+        public virtual void IsTokenValidWhenAnValidTokenDtoIsProvided()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Is token valid when an valid TokenDto is provided", "\tValidate token when TokenDto parameter is generated based on an valid UserDto, u" +
+                    "ser exists in database", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 113
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 115
+ testRunner.Given("a token generated based on a valid UserDto that exists in database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 116
+ testRunner.And("create HttpContent for isTokenValid", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 117
+ testRunner.When("try validate token", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 118
+ testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+#line 119
+ testRunner.And("returned token is the same, not-null and not-empty", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Is token valid when an valid TokenTdo is provided, token expiration less than a d" +
+            "ay")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Is token valid when an valid TokenTdo is provided, token expiration less than a d" +
+            "ay")]
+        public virtual void IsTokenValidWhenAnValidTokenTdoIsProvidedTokenExpirationLessThanADay()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Is token valid when an valid TokenTdo is provided, token expiration less than a d" +
+                    "ay", "\tValidate token when TokenDto parameter is generated based on an valid UserDto, u" +
+                    "ser exists in database, but expiration is less than a day", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 121
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 123
+ testRunner.Given("a token generated based on a valid UserDto that exists in database but with expir" +
+                        "ation less than a day", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 124
+ testRunner.And("create HttpContent for isTokenValid", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 125
+ testRunner.When("try validate token", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 126
+ testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+#line 127
+ testRunner.And("return a new token with updated expiration date, not-null and not-empty", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Is token valid when an valid TokenDto is provided, token expiration more than a d" +
+            "ay")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Is token valid when an valid TokenDto is provided, token expiration more than a d" +
+            "ay")]
+        public virtual void IsTokenValidWhenAnValidTokenDtoIsProvidedTokenExpirationMoreThanADay()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Is token valid when an valid TokenDto is provided, token expiration more than a d" +
+                    "ay", "\tValidate token when TokenDto parameter is generated based on an valid UserDto, u" +
+                    "ser exists in database, but expiration is more than a day", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 129
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 131
+ testRunner.Given("a token generated based on a valid UserDto that exists in database but with expir" +
+                        "ation more than a day", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 132
+ testRunner.And("create HttpContent for isTokenValid", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 133
+ testRunner.When("try validate token", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 134
+ testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table12 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Status",
+                            "Message"});
+                table12.AddRow(new string[] {
+                            "False",
+                            "Token validation failed."});
+#line 135
+ testRunner.And("following details of error for isTokenValid are", ((string)(null)), table12, "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Is token valid when an altered TokenDto is provided")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Is token valid when an altered TokenDto is provided")]
+        public virtual void IsTokenValidWhenAnAlteredTokenDtoIsProvided()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Is token valid when an altered TokenDto is provided", "\tValidate token when TokenDto parameter is altered", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 139
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 141
+ testRunner.Given("an altered token", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 142
+ testRunner.And("create HttpContent for isTokenValid", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 143
+ testRunner.When("try validate token", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 144
+ testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table13 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Status",
+                            "Message"});
+                table13.AddRow(new string[] {
+                            "False",
+                            "Token validation failed."});
+#line 145
+ testRunner.And("following details of error for isTokenValid are", ((string)(null)), table13, "And ");
 #line hidden
             }
             this.ScenarioCleanup();
