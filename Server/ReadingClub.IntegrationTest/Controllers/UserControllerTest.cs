@@ -242,7 +242,7 @@ namespace ReadingClub.IntegrationTest.Controllers
 
             Assert.True(resultContent?.Status);
             Assert.NotNull(resultContent?.Data);
-            Assert.NotEmpty(resultContent.Data);
+            Assert.NotEmpty(resultContent?.Data);
         }
 
         [Fact]

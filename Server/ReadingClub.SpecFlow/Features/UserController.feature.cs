@@ -89,7 +89,7 @@ namespace ReadingClub.SpecFlow.Features
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Anonymous user try create an account with invalid input (empty DTO scenario)", "\tAn anonymous user try to create an account by providing to API an empty CreateUs" +
                     "erDto", tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 4
+#line 3
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -109,16 +109,16 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 6
+#line 5
  testRunner.Given("an empty CreateUserDto object", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 7
- testRunner.And("create HttpContent for request", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line 6
+ testRunner.And("create HttpContent for create request", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 8
+#line 7
  testRunner.When("try create an account", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 9
+#line 8
  testRunner.Then("an HttpStatusCode.BadRequest is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
                 TechTalk.SpecFlow.Table table1 = new TechTalk.SpecFlow.Table(new string[] {
@@ -135,7 +135,7 @@ this.ScenarioInitialize(scenarioInfo);
                             "Invalid Email address.",
                             "The Password field is required.",
                             "The Confirm password field is required."});
-#line 10
+#line 9
  testRunner.And("the following details of errors for created account with empty DTO are", ((string)(null)), table1, "And ");
 #line hidden
             }
@@ -155,7 +155,7 @@ this.ScenarioInitialize(scenarioInfo);
                     "o)", "\tAn anonymous user try to create an account by providing to API a CreateUserDto o" +
                     "bject with invalid Email field and Password and ConfirmPassword fields that do n" +
                     "ot match", tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 16
+#line 13
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -185,16 +185,16 @@ this.ScenarioInitialize(scenarioInfo);
                             "Test",
                             "Test",
                             "Something different"});
-#line 18
+#line 15
  testRunner.Given("an invalid CreateUserDto object", ((string)(null)), table2, "Given ");
 #line hidden
-#line 21
- testRunner.And("create HttpContent for request", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line 18
+ testRunner.And("create HttpContent for create request", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 22
+#line 19
  testRunner.When("try create an account", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 23
+#line 20
  testRunner.Then("an HttpStatusCode.BadRequest is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
                 TechTalk.SpecFlow.Table table3 = new TechTalk.SpecFlow.Table(new string[] {
@@ -205,23 +205,23 @@ this.ScenarioInitialize(scenarioInfo);
                             "2",
                             "Invalid Email address.",
                             "The Password and Confirmation password do not match."});
-#line 24
+#line 21
  testRunner.And("the following details of errors for created account with invalid fields DTO are", ((string)(null)), table3, "And ");
 #line hidden
             }
             this.ScenarioCleanup();
         }
         
-        [Xunit.SkippableFactAttribute(DisplayName="Anonymous user create an account")]
+        [Xunit.SkippableFactAttribute(DisplayName="Anonymous user try create an account where username already exists")]
         [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
-        [Xunit.TraitAttribute("Description", "Anonymous user create an account")]
-        public virtual void AnonymousUserCreateAnAccount()
+        [Xunit.TraitAttribute("Description", "Anonymous user try create an account where username already exists")]
+        public virtual void AnonymousUserTryCreateAnAccountWhereUsernameAlreadyExists()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Anonymous user create an account", "\tAn anonymous user create an account by providing to API a valid CreateUserDto ob" +
-                    "ject", tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 30
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Anonymous user try create an account where username already exists", "\tAn anonymous user try create an account, but username in DTO already exists in d" +
+                    "atabase", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 25
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -241,38 +241,356 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-                TechTalk.SpecFlow.Table table4 = new TechTalk.SpecFlow.Table(new string[] {
-                            "UserName",
-                            "Email",
-                            "Password",
-                            "ConfirmPassword"});
-                table4.AddRow(new string[] {
-                            "test user",
-                            "testUser@test.com",
-                            "password",
-                            "password"});
-#line 32
- testRunner.Given("a valid CreateUserDto object", ((string)(null)), table4, "Given ");
+#line 27
+ testRunner.Given("an valid user in database instantiate an CreateUserDto with the same username", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 35
- testRunner.And("create HttpContent for request", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line 28
+ testRunner.And("create HttpContent for create request", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 36
+#line 29
  testRunner.When("try create an account", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
+#line 30
+ testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table4 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Status",
+                            "Message"});
+                table4.AddRow(new string[] {
+                            "False",
+                            "This user name already exists."});
+#line 31
+ testRunner.And("the following details of error for created account with same fields are", ((string)(null)), table4, "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Anonymous user try create an account where email already exists")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Anonymous user try create an account where email already exists")]
+        public virtual void AnonymousUserTryCreateAnAccountWhereEmailAlreadyExists()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Anonymous user try create an account where email already exists", "\tAn anonymous user try create an account, but email in DTO already exists in data" +
+                    "base", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 35
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
 #line 37
+ testRunner.Given("an valid user in database instantiate an CreateUserDto with the same email", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 38
+ testRunner.And("create HttpContent for create request", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 39
+ testRunner.When("try create an account", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 40
  testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
                 TechTalk.SpecFlow.Table table5 = new TechTalk.SpecFlow.Table(new string[] {
                             "Status",
+                            "Message"});
+                table5.AddRow(new string[] {
+                            "False",
+                            "This email already exists."});
+#line 41
+ testRunner.And("the following details of error for created account with same fields are", ((string)(null)), table5, "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Anonymous user try create an account where username and email already exists")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Anonymous user try create an account where username and email already exists")]
+        public virtual void AnonymousUserTryCreateAnAccountWhereUsernameAndEmailAlreadyExists()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Anonymous user try create an account where username and email already exists", "\tAn anonymous user try create an account, but username and email in DTO already e" +
+                    "xists in database", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 45
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 47
+ testRunner.Given("an valid user in database instantiate an CreateUserDto with the same username and" +
+                        " email", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 48
+ testRunner.And("create HttpContent for create request", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 49
+ testRunner.When("try create an account", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 50
+ testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table6 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Status",
+                            "Message"});
+                table6.AddRow(new string[] {
+                            "False",
+                            "This user name and emai already exists."});
+#line 51
+ testRunner.And("the following details of error for created account with same fields are", ((string)(null)), table6, "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Anonymous user create an account")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Anonymous user create an account")]
+        public virtual void AnonymousUserCreateAnAccount()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Anonymous user create an account", "\tAn anonymous user create an account by providing to API a valid CreateUserDto ob" +
+                    "ject", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 55
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+                TechTalk.SpecFlow.Table table7 = new TechTalk.SpecFlow.Table(new string[] {
+                            "UserName",
+                            "Email",
+                            "Password",
+                            "ConfirmPassword"});
+                table7.AddRow(new string[] {
+                            "test user",
+                            "testUser@test.com",
+                            "password",
+                            "password"});
+#line 57
+ testRunner.Given("a valid CreateUserDto object", ((string)(null)), table7, "Given ");
+#line hidden
+#line 60
+ testRunner.And("create HttpContent for create request", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 61
+ testRunner.When("try create an account", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 62
+ testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table8 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Status",
                             "UserName",
                             "Email"});
-                table5.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "True",
                             "test user",
                             "testuser@test.com"});
-#line 38
- testRunner.And("the following details for created account are returned", ((string)(null)), table5, "And ");
+#line 63
+ testRunner.And("the following details for created account are returned", ((string)(null)), table8, "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Anonymous user try login with empty DTO")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Anonymous user try login with empty DTO")]
+        public virtual void AnonymousUserTryLoginWithEmptyDTO()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Anonymous user try login with empty DTO", "\tAn anonymous user try to ligin with empty DTO", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 70
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 72
+ testRunner.Given("an empty UserLoginDto", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 73
+ testRunner.And("create HttpContent for login request", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 74
+ testRunner.When("try login", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 75
+ testRunner.Then("an HttpStatusCode.BadRequest is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table9 = new TechTalk.SpecFlow.Table(new string[] {
+                            "ErrorCount",
+                            "EmailError",
+                            "PasswordError"});
+                table9.AddRow(new string[] {
+                            "2",
+                            "The Email field is required.",
+                            "The Password field is required."});
+#line 76
+ testRunner.And("the following details of errors for login are", ((string)(null)), table9, "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Anonymous user login")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Anonymous user login")]
+        public virtual void AnonymousUserLogin()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Anonymous user login", "\tAn anonymous user login with valid credentials, user must be in database", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 80
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 82
+ testRunner.Given("a valid user in database login with its credentials", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 83
+ testRunner.And("create HttpContent for login request", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 84
+ testRunner.When("try login", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 85
+ testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+#line 86
+ testRunner.And("a non-null and non-empty token is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Anonymous user try login with inexistend credentials")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Anonymous user try login with inexistend credentials")]
+        public virtual void AnonymousUserTryLoginWithInexistendCredentials()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Anonymous user try login with inexistend credentials", "\tAn anonymous user try login with inexistent credentials", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 88
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 90
+ testRunner.Given("invalid credentials in UserLoginDto", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 91
+ testRunner.And("create HttpContent for login request", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 92
+ testRunner.When("try login", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 93
+ testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table10 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Status",
+                            "Message"});
+                table10.AddRow(new string[] {
+                            "False",
+                            "User do not exists or password is incorrect."});
+#line 94
+ testRunner.And("the following details of errors for login with inexistent credentials are", ((string)(null)), table10, "And ");
 #line hidden
             }
             this.ScenarioCleanup();

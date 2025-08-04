@@ -1,8 +1,13 @@
+using Microsoft.AspNetCore.Authentication;
 using Newtonsoft.Json;
+using ReadingClub.Domain;
 using ReadingClub.Infrastructure.DTO.User;
 using ReadingClub.SpecFlow.Support;
+using ReadingClub.SpecFlow.Support.Utilities;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
+using TechTalk.SpecFlow.CommonModels;
 
 namespace ReadingClub.SpecFlow.StepDefinitions
 {
@@ -13,6 +18,7 @@ namespace ReadingClub.SpecFlow.StepDefinitions
         private HttpClient _httpClient;
 
         private CreateUserDto _createUserDto = null!;
+        private UserLoginDto _userLoginDto = null!;
         private HttpContent _content = null!;
         private HttpResponseMessage _response = null!;
 
@@ -40,14 +46,14 @@ namespace ReadingClub.SpecFlow.StepDefinitions
             _createUserDto = new CreateUserDto() { };
         }
 
-        [Given(@"create HttpContent for request")]
-        public void GivenCreateHttpContentForRequest()
+        [Given(@"create HttpContent for create request")]
+        public void GivenCreateHttpContentForCreateRequest()
         {
             string json = JsonConvert.SerializeObject(_createUserDto);
             _content = new StringContent(json, Encoding.UTF8, "application/json");
         }
 
-        [Given("an invalid CreateUserDto object")]
+        [Given(@"an invalid CreateUserDto object")]
         public void GivenAnInvalidCreateUserDtoObject(Table table)
         {
             _createUserDto = new CreateUserDto()
@@ -59,10 +65,93 @@ namespace ReadingClub.SpecFlow.StepDefinitions
             };
         }
 
+        [Given(@"an valid user in database instantiate an CreateUserDto with the same username")]
+        public async Task GivenAnValidUserInDatabaseInstantiateAnCreateUserDtoWithTheSameUsername()
+        {
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            _createUserDto = new CreateUserDto()
+            {
+                UserName = user.UserName,
+                Email = "another" + user.Email,
+                Password = user.Password,
+                ConfirmPassword = user.Password
+            };
+        }
+
+        [Given(@"an valid user in database instantiate an CreateUserDto with the same email")]
+        public async Task GivenAnValidUserInDatabaseInstantiateAnCreateUserDtoWithTheSameEmailAsync()
+        {
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            _createUserDto = new CreateUserDto()
+            {
+                UserName = "another" + user.UserName,
+                Email = user.Email,
+                Password = user.Password,
+                ConfirmPassword = user.Password
+            };
+        }
+
+        [Given(@"an valid user in database instantiate an CreateUserDto with the same username and email")]
+        public async Task GivenAnValidUserInDatabaseInstantiateAnCreateUserDtoWithTheSameUsernameAndEmailAsync()
+        {
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            _createUserDto = new CreateUserDto()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                Password = user.Password,
+                ConfirmPassword = user.Password
+            };
+        }
+
+        [Given(@"an empty UserLoginDto")]
+        public void GivenAnEmptyUserLoginDto()
+        {
+            _userLoginDto = new UserLoginDto();
+        }
+
+        [Given(@"create HttpContent for login request")]
+        public void GivenCreateHttpContentForLoginRequest()
+        {
+            string json = JsonConvert.SerializeObject(_userLoginDto);
+            _content = new StringContent(json, Encoding.UTF8, "application/json");
+        }
+
+        [Given(@"a valid user in database login with its credentials")]
+        public async Task GivenAValidUserInDatabaseLoginWithItsCredentials()
+        {
+            User user = await TestHelper.AddNewUserToTestDatabase();
+
+            _userLoginDto = new UserLoginDto()
+            {
+                Email = user.Email,
+                Password = TestHelper.OriginalPassword
+            };
+        }
+
+        [Given(@"invalid credentials in UserLoginDto")]
+        public void GivenInvalidCredentialsInUserLoginDto()
+        {
+            _userLoginDto = new UserLoginDto()
+            {
+                Email = "wrongEmail@test.com",
+                Password = "wrongPassword"
+            };
+        }
+
         [When(@"try create an account")]
         public async Task WhenTryCreateAnAccount()
         {
             _response =await _httpClient.PostAsync("/api/User/create", _content);
+        }
+
+        [When(@"try login")]
+        public async Task WhenTryLoginAsync()
+        {
+            _response = await _httpClient.PostAsync("/api/User/login", _content);
         }
 
         [Then(@"an HttpStatusCode\.OK is returned")]
@@ -71,7 +160,7 @@ namespace ReadingClub.SpecFlow.StepDefinitions
             Assert.Equal(HttpStatusCode.OK, _response.StatusCode);
         }
 
-        [Then("an HttpStatusCode.BadRequest is returned")]
+        [Then(@"an HttpStatusCode.BadRequest is returned")]
         public void ThenAnHttpStatusCode_BadRequestIsReturned()
         {
             Assert.Equal(HttpStatusCode.BadRequest, _response.StatusCode);
@@ -105,7 +194,7 @@ namespace ReadingClub.SpecFlow.StepDefinitions
             Assert.Equal(table.Rows[0]["ConfirmPasswordError"], resultContent?.errors["ConfirmPassword"][0]);
         }
 
-        [Then("the following details of errors for created account with invalid fields DTO are")]
+        [Then(@"the following details of errors for created account with invalid fields DTO are")]
         public async Task ThenTheFollowingDetailsOfErrorsForCreatedAccountWithInvalidFieldsDTOAre(Table table)
         {
             var result = await _response.Content.ReadAsStringAsync();
@@ -117,6 +206,56 @@ namespace ReadingClub.SpecFlow.StepDefinitions
             Assert.Equal(table.Rows[0]["EmailError"], resultContent?.errors["Email"][0]);
             Assert.Equal(table.Rows[0]["ConfirmPasswordError"], resultContent?.errors["ConfirmPassword"][0]);
         }
+
+        [Then(@"the following details of error for created account with same fields are")]
+        public async Task ThenTheFollowingDetailsOfErrorForCreatedAccountWithSameFieldsAreAsync(Table table)
+        {
+            var result = await _response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, 
+                new { Status = false, Message = (string)null! });
+
+            Assert.Equal(table.Rows[0]["Status"], resultContent?.Status.ToString());
+            Assert.Equal(table.Rows[0]["Message"], resultContent?.Message);
+        }
+
+        [Then(@"the following details of errors for login are")]
+        public async Task ThenTheFollowingDetailsOfErrorsForLoginAreAsync(Table table)
+        {
+            var result = await _response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result,
+                new { errors = (Dictionary<string, string[]>)null! });
+
+            Assert.Equal(int.Parse(table.Rows[0]["ErrorCount"]), resultContent?.errors.Count);
+            Assert.Equal(table.Rows[0]["EmailError"], resultContent?.errors["Email"][0]);
+            Assert.Equal(table.Rows[0]["PasswordError"], resultContent?.errors["Password"][0]);
+        }
+
+        [Then(@"a non-null and non-empty token is returned")]
+        public async Task ThenANon_NullAndNon_EmptyTokenIsReturnedAsync()
+        {
+            var result = await _response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (string)null! });
+
+            Assert.True(resultContent?.Status);
+            Assert.NotNull(resultContent?.Data);
+            Assert.NotEmpty(resultContent?.Data);
+        }
+
+        [Then(@"the following details of errors for login with inexistent credentials are")]
+        public async Task ThenTheFollowingDetailsOfErrorsForLoginWithInexistentCredentialsAre(Table table)
+        {
+            var result = await _response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Message = (string)null! });
+
+            Assert.Equal(table.Rows[0]["Status"], resultContent?.Status.ToString());
+            Assert.Equal(table.Rows[0]["Message"], resultContent?.Message);
+        }
+
+
 
     }
 }
