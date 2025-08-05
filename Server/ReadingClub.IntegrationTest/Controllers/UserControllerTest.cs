@@ -470,7 +470,7 @@ namespace ReadingClub.IntegrationTest.Controllers
             UserDto userDto = new UserDto()
             {
                 UserName = "someValidUserName",
-                Email = "someValieEmail@test.com"
+                Email = "someValidEmail@test.com"
             };
 
             string? token = TestHelper.GenerateToken(userDto);

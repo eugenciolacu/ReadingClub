@@ -861,6 +861,408 @@ this.ScenarioInitialize(scenarioInfo);
             this.ScenarioCleanup();
         }
         
+        [Xunit.SkippableFactAttribute(DisplayName="Get user details with a JWT token that has no email claim")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Get user details with a JWT token that has no email claim")]
+        public virtual void GetUserDetailsWithAJWTTokenThatHasNoEmailClaim()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Get user details with a JWT token that has no email claim", "\tGet user with a JWT token that has no email claim", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 153
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 155
+ testRunner.Given("a UserDto object with empty fields", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 156
+    testRunner.And("generate JWT token and set it in the Authorization header", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 157
+    testRunner.When("try get user", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 158
+    testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table14 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Status",
+                            "Message"});
+                table14.AddRow(new string[] {
+                            "False",
+                            "An error occurred during processing, user not found."});
+#line 159
+ testRunner.And("the following details of error for getting user are", ((string)(null)), table14, "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Get user details with a JWT token that has inexistent credentials")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Get user details with a JWT token that has inexistent credentials")]
+        public virtual void GetUserDetailsWithAJWTTokenThatHasInexistentCredentials()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Get user details with a JWT token that has inexistent credentials", "\tGet user with a JWT token that has inexistent credentials in database", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 163
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 165
+ testRunner.Given("a UserDto object with inexistent credentials", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 166
+ testRunner.And("generate JWT token and set it in the Authorization header", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 167
+    testRunner.When("try get user", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 168
+ testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table15 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Status",
+                            "Message"});
+                table15.AddRow(new string[] {
+                            "False",
+                            "An error occurred during processing, user not found."});
+#line 169
+ testRunner.And("the following details of error for getting user are", ((string)(null)), table15, "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Get user details with a JWT token that is valid")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Get user details with a JWT token that is valid")]
+        public virtual void GetUserDetailsWithAJWTTokenThatIsValid()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Get user details with a JWT token that is valid", "\tGet user details with a JWT token that is valid", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 173
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 175
+ testRunner.Given("a UserDto object with valid fields, user is in database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 176
+ testRunner.And("generate JWT token and set it in the Authorization header", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 177
+    testRunner.When("try get user", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 178
+ testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+#line 179
+ testRunner.And("the same user details is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Update user with invalid UpdateUserDto object, empty fields")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Update user with invalid UpdateUserDto object, empty fields")]
+        public virtual void UpdateUserWithInvalidUpdateUserDtoObjectEmptyFields()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Update user with invalid UpdateUserDto object, empty fields", "\tUpdate user with invalid UpdateUserDto object, empty fields", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 185
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 187
+ testRunner.Given("a UserDto object with valid fields, user is in database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 188
+ testRunner.And("generate JWT token and set it in the Authorization header", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 189
+ testRunner.And("create an UpdateUserDto object with empty fields", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 190
+ testRunner.And("create HttpContent for update", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 191
+ testRunner.When("try update user", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 192
+ testRunner.Then("an HttpStatusCode.BadRequest is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table16 = new TechTalk.SpecFlow.Table(new string[] {
+                            "ErrorCount",
+                            "UserNameError",
+                            "EmailError0",
+                            "EmailError1",
+                            "PasswordError",
+                            "ConfirmPasswordError",
+                            "OldEmailError"});
+                table16.AddRow(new string[] {
+                            "5",
+                            "The User name field is required.",
+                            "The Email address is required.",
+                            "Invalid Email address.",
+                            "The Password field is required.",
+                            "The Confirm password field is required.",
+                            "The OldEmail field is required."});
+#line 193
+ testRunner.And("the following details of error for update user with an invalid UpdateUserDto obje" +
+                        "ct with empty fields are", ((string)(null)), table16, "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Update user with invalid UpdateUserDto object, wrong fields")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Update user with invalid UpdateUserDto object, wrong fields")]
+        public virtual void UpdateUserWithInvalidUpdateUserDtoObjectWrongFields()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Update user with invalid UpdateUserDto object, wrong fields", "\tUpdate user with invalid UpdateUserDto, wrong fields", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 197
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 199
+ testRunner.Given("a UserDto object with valid fields, user is in database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 200
+ testRunner.And("generate JWT token and set it in the Authorization header", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 201
+ testRunner.And("create an invalid UpdateUserDto object", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 202
+ testRunner.And("create HttpContent for update", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 203
+ testRunner.When("try update user", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 204
+ testRunner.Then("an HttpStatusCode.BadRequest is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table17 = new TechTalk.SpecFlow.Table(new string[] {
+                            "ErrorCount",
+                            "EmailError",
+                            "ConfirmPasswordError"});
+                table17.AddRow(new string[] {
+                            "2",
+                            "Invalid Email address.",
+                            "The Password and Confirmation password do not match."});
+#line 205
+ testRunner.And("the following details of error for update user with invalid UpdateUserDto object " +
+                        "are", ((string)(null)), table17, "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Update user with invalid UpdateUserDto object, wrong OldEmail, user to be updated" +
+            " cannot be found in database")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Update user with invalid UpdateUserDto object, wrong OldEmail, user to be updated" +
+            " cannot be found in database")]
+        public virtual void UpdateUserWithInvalidUpdateUserDtoObjectWrongOldEmailUserToBeUpdatedCannotBeFoundInDatabase()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Update user with invalid UpdateUserDto object, wrong OldEmail, user to be updated" +
+                    " cannot be found in database", "\tUpdate user with invalid UpdateUserDto object, wrong OldEmail, user to be update" +
+                    "d cannot be found in database", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 209
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 211
+ testRunner.Given("a UserDto object with valid fields, user is in database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 212
+ testRunner.And("generate JWT token and set it in the Authorization header", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 213
+ testRunner.And("create an invalid UpdateUserDto object with wrong OldEmail field", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 214
+ testRunner.And("create HttpContent for update", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 215
+ testRunner.When("try update user", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 216
+ testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table18 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Status",
+                            "Message"});
+                table18.AddRow(new string[] {
+                            "False",
+                            "An error occurred during processing, user not found."});
+#line 217
+ testRunner.And("the following details of error for updated with invalid UpdatedUserDto object, wr" +
+                        "ong OldEmail field, are", ((string)(null)), table18, "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Update user with valid UpdateUserDto object")]
+        [Xunit.TraitAttribute("FeatureTitle", "Integration tests for UserController class")]
+        [Xunit.TraitAttribute("Description", "Update user with valid UpdateUserDto object")]
+        public virtual void UpdateUserWithValidUpdateUserDtoObject()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Update user with valid UpdateUserDto object", "\tUpdate user with valid UpdateUserDto object, return updated user details", tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 221
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 223
+ testRunner.Given("a UserDto object with valid fields, user is in database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 224
+ testRunner.And("generate JWT token and set it in the Authorization header", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 225
+ testRunner.And("create a valid UpdateUserDto object", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 226
+ testRunner.And("create HttpContent for update", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 227
+ testRunner.When("try update user", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 228
+ testRunner.Then("an HttpStatusCode.OK is returned", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+#line 229
+ testRunner.And("returned data are the same as in UpdateUserDto object", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
         [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
         [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
         public class FixtureData : System.IDisposable

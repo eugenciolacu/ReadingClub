@@ -1,4 +1,5 @@
 using Gherkin;
+using Microsoft.AspNetCore.Authentication;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ReadingClub.Domain;
@@ -6,7 +7,9 @@ using ReadingClub.Infrastructure.DTO.User;
 using ReadingClub.SpecFlow.Support;
 using ReadingClub.SpecFlow.Support.Utilities;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
+using TechTalk.SpecFlow.CommonModels;
 
 namespace ReadingClub.SpecFlow.StepDefinitions
 {
@@ -21,8 +24,9 @@ namespace ReadingClub.SpecFlow.StepDefinitions
         private HttpContent _content = null!;
         private HttpResponseMessage _response = null!;
         private string? _token = null!;
-        private TokenDto _tokenDto = null!;
         private UserDto _userDto = null!;
+        private UpdateUserDto _updateUserDto = null!;
+        private User _user = null!;
 
         public IntegrationTestsForUserControllerClassStepDefinitions()
         {
@@ -220,6 +224,99 @@ namespace ReadingClub.SpecFlow.StepDefinitions
             _token = TestHelper.GenerateAlteredToken(_userDto);
         }
 
+        [Given(@"a UserDto object with empty fields")]
+        public void GivenAUserDtoObjectWithEmptyFields()
+        {
+            _userDto = new UserDto()
+            {
+                UserName = "",
+                Email = ""
+            };
+        }
+
+        [Given(@"generate JWT token and set it in the Authorization header")]
+        public void GivenGenerateJWTTokenAndSetItInTheAuthorizationHeader()
+        {
+            string? token = TestHelper.GenerateToken(_userDto);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+
+        [Given(@"a UserDto object with inexistent credentials")]
+        public void GivenAUserDtoObjectWithInexistentCredentials()
+        {
+            _userDto = new UserDto()
+            {
+                UserName = "someValidUserName",
+                Email = "someValidEmail@test.com"
+            };
+        }
+
+        [Given(@"a UserDto object with valid fields, user is in database")]
+        public async Task GivenAUserDtoObjectWithValidFieldsUserIsInDatabaseAsync()
+        {
+            _user = await TestHelper.AddNewUserToTestDatabase();
+
+            _userDto = new UserDto()
+            {
+                UserName = _user.UserName,
+                Email = _user.Email,
+            };
+        }
+
+        [Given(@"create an UpdateUserDto object with empty fields")]
+        public void GivenCreateAnUpdateUserDtoObjectWithEmptyFields()
+        {
+            _updateUserDto = new UpdateUserDto();
+        }
+
+        [Given(@"create HttpContent for update")]
+        public void GivenCreateHttpContentForUpdate()
+        {
+            string jsonWhenEmptyFields = JsonConvert.SerializeObject(_updateUserDto);
+            _content = new StringContent(jsonWhenEmptyFields, Encoding.UTF8, "application/json");
+        }
+
+        [Given(@"create an invalid UpdateUserDto object")]
+        public void GivenCreateAnInvalidUpdateUserDtoObject()
+        {
+            _updateUserDto = new UpdateUserDto()
+            {
+                UserName = "Test",
+                Email = "Test",
+                Password = "Test",
+                ConfirmPassword = "Something different",
+                OldEmail = _user.Email,
+                IsEditPassword = true,
+            };
+        }
+
+        [Given(@"create an invalid UpdateUserDto object with wrong OldEmail field")]
+        public void GivenCreateAnInvalidUpdateUserDtoObjectWithWrongOldEmailField()
+        {
+            _updateUserDto = new UpdateUserDto()
+            {
+                UserName = "NewUserName",
+                Email = "newEmail@test.com",
+                Password = "newPassword",
+                ConfirmPassword = "newPassword",
+                OldEmail = "wrongOldEmail@test.com",
+                IsEditPassword = true
+            };
+        }
+
+        [Given(@"create a valid UpdateUserDto object")]
+        public void GivenCreateAValidUpdateUserDtoObject()
+        {
+            _updateUserDto = new UpdateUserDto()
+            {
+                UserName = Guid.NewGuid().ToString(),
+                Email = Guid.NewGuid().ToString() + "@test.com",
+                Password = "newPassword",
+                ConfirmPassword = "newPassword",
+                OldEmail = _user.Email,
+                IsEditPassword = true
+            };
+        }
 
         [When(@"try create an account")]
         public async Task WhenTryCreateAnAccount()
@@ -237,6 +334,18 @@ namespace ReadingClub.SpecFlow.StepDefinitions
         public async Task WhenTryValidateTokenAsync()
         {
             _response = await _httpClient.PostAsync("/api/User/isTokenValid", _content);
+        }
+
+        [When(@"try get user")]
+        public async Task WhenTryGetUserAsync()
+        {
+            _response = await _httpClient.PostAsync("/api/User/getFullDetailsOfLoggedUser", null);
+        }
+
+        [When(@"try update user")]
+        public async Task WhenTryUpdateUserAsync()
+        {
+            _response = await _httpClient.PutAsync("/api/User/update", _content);
         }
 
         [Then(@"an HttpStatusCode\.OK is returned")]
@@ -377,9 +486,81 @@ namespace ReadingClub.SpecFlow.StepDefinitions
             Assert.NotEqual(_token, resultContent?.Data);
         }
 
+        [Then(@"the following details of error for getting user are")]
+        public async Task ThenTheFollowingDetailsOfErrorForGettingUserAre(Table table)
+        {
+            var result = await _response.Content.ReadAsStringAsync();
 
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, 
+                new { Status = false, Message = (string)null! });
 
+            Assert.Equal(table.Rows[0]["Status"], resultContent?.Status.ToString());
+            Assert.Equal(table.Rows[0]["Message"], resultContent?.Message);
+        }
 
+        [Then(@"the same user details is returned")]
+        public async Task ThenTheSameUserDetailsIsReturnedAsync()
+        {
+            var result = await _response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (UserDto)null! });
+
+            Assert.True(resultContent?.Status);
+            Assert.Equal(_userDto.UserName, resultContent?.Data.UserName);
+            Assert.Equal(_userDto.Email, resultContent?.Data.Email);
+        }
+
+        [Then(@"the following details of error for update user with an invalid UpdateUserDto object with empty fields are")]
+        public async Task ThenTheFollowingDetailsOfErrorForUpdateUserWithAnInvalidUpdateUserDtoObjectWithEmptyFieldsAreAsync(Table table)
+        {
+            var result = await _response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result,
+                new { errors = (Dictionary<string, string[]>)null! });
+            Assert.Equal(int.Parse(table.Rows[0]["ErrorCount"]), resultContent?.errors.Count);
+            Assert.Equal(table.Rows[0]["UserNameError"], resultContent?.errors["UserName"][0]);
+            Assert.Equal(table.Rows[0]["EmailError0"], resultContent?.errors["Email"][0]);
+            Assert.Equal(table.Rows[0]["EmailError1"], resultContent?.errors["Email"][1]);
+            Assert.Equal(table.Rows[0]["PasswordError"], resultContent?.errors["Password"][0]);
+            Assert.Equal(table.Rows[0]["ConfirmPasswordError"], resultContent?.errors["ConfirmPassword"][0]);
+            Assert.Equal(table.Rows[0]["OldEmailError"], resultContent?.errors["OldEmail"][0]);
+        }
+
+        [Then(@"the following details of error for update user with invalid UpdateUserDto object are")]
+        public async Task ThenTheFollowingDetailsOfErrorForUpdateUserWithInvalidUpdateUserDtoObjectAreAsync(Table table)
+        {
+            var result = await _response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result,
+                new { errors = (Dictionary<string, string[]>)null! });
+            Assert.Equal(int.Parse(table.Rows[0]["ErrorCount"]), resultContent?.errors.Count);
+            Assert.Equal(table.Rows[0]["EmailError"], resultContent?.errors["Email"][0]);
+            Assert.Equal(table.Rows[0]["ConfirmPasswordError"], resultContent?.errors["ConfirmPassword"][0]);
+        }
+
+        [Then(@"the following details of error for updated with invalid UpdatedUserDto object, wrong OldEmail field, are")]
+        public async Task ThenTheFollowingDetailsOfErrorForUpdatedWithInvalidUpdatedUserDtoObjectWrongOldEmailFieldAreAsync(Table table)
+        {
+            var result = await _response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result,
+                new { Status = false, Message = (string)null! });
+
+            Assert.Equal(table.Rows[0]["Status"], resultContent?.Status.ToString());
+            Assert.Equal(table.Rows[0]["Message"], resultContent?.Message);
+        }
+
+        [Then(@"returned data are the same as in UpdateUserDto object")]
+        public async Task ThenReturnedDataAreTheSameAsInUpdateUserDtoObjectAsync()
+        {
+            var result = await _response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { NewStatus = false, Data = (UserDto)null! });
+
+            Assert.True(resultContent?.NewStatus);
+            Assert.Equal(_updateUserDto.UserName, resultContent?.Data.UserName);
+            Assert.Equal(_updateUserDto.Email.ToLower(), resultContent?.Data.Email);
+        }
 
 
     }
