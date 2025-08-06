@@ -227,3 +227,47 @@ Scenario: Update user with valid UpdateUserDto object
 	When try update user
 	Then an HttpStatusCode.OK is returned
 	And returned data are the same as in UpdateUserDto object
+
+
+
+
+
+Scenario: Delete user with invalid claims identity, user not found
+	Given a UserDto object with empty fields
+	And generate JWT token and set it in the Authorization header
+	When try delete user
+	Then an HttpStatusCode.OK is returned
+	And the following details of error for delete with invalid claims identity are
+		| Status | Message                                              |
+		| False  | An error occurred during processing, user not found. |
+
+Scenario: Delete user with valid claims identity
+	Given a UserDto object with valid fields, user is in database 
+	And generate JWT token and set it in the Authorization header
+	When try delete user
+	Then an HttpStatusCode.OK is returned
+	And the following delete details are
+		| Status |
+		| True   |
+
+
+
+
+
+Scenario: Get logged user having valid claims identity
+	Get logged user having valid claims identity
+	Given a UserDto object with valid fields, user is in database 
+	And generate JWT token and set it in the Authorization header
+	When try get logged user
+	Then an HttpStatusCode.OK is returned
+	And the same user details is returned
+
+Scenario: Get logged user having an invalid claims identity
+	Get logged user having valid claims identity
+	Given a UserDto object with empty fields
+	And generate JWT token and set it in the Authorization header
+	When try get logged user
+	Then an HttpStatusCode.OK is returned
+	And the following details of errors for get logged user are
+		| Status | Message                                              |
+		| False  | An error occurred during processing, user not found. |

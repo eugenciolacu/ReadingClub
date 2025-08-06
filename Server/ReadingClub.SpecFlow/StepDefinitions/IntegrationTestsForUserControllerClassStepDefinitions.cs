@@ -318,6 +318,12 @@ namespace ReadingClub.SpecFlow.StepDefinitions
             };
         }
 
+        [When(@"try delete user")]
+        public async Task WhenTryDeleteUserAsync()
+        {
+            _response = await _httpClient.DeleteAsync("/api/User/deleteLoggedUser");
+        }
+
         [When(@"try create an account")]
         public async Task WhenTryCreateAnAccount()
         {
@@ -348,6 +354,13 @@ namespace ReadingClub.SpecFlow.StepDefinitions
             _response = await _httpClient.PutAsync("/api/User/update", _content);
         }
 
+        [When(@"try get logged user")]
+        public async Task WhenTryGetLoggedUserAsync()
+        {
+            _response = await _httpClient.PostAsync("/api/User/getLoggedUser", null);
+        }
+
+
         [Then(@"an HttpStatusCode\.OK is returned")]
         public void ThenAnHttpStatusCode_OKIsReturned()
         {
@@ -365,7 +378,8 @@ namespace ReadingClub.SpecFlow.StepDefinitions
         {
             var result = await _response.Content.ReadAsStringAsync();
 
-            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (UserDto)null! });
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, 
+                new { Status = false, Data = (UserDto)null! });
 
             Assert.Equal(table.Rows[0]["Status"], resultContent?.Status.ToString());
             Assert.Equal(table.Rows[0]["UserName"], resultContent?.Data.UserName);
@@ -431,7 +445,8 @@ namespace ReadingClub.SpecFlow.StepDefinitions
         {
             var result = await _response.Content.ReadAsStringAsync();
 
-            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (string)null! });
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, 
+                new { Status = false, Data = (string)null! });
 
             Assert.True(resultContent?.Status);
             Assert.NotNull(resultContent?.Data);
@@ -443,7 +458,8 @@ namespace ReadingClub.SpecFlow.StepDefinitions
         {
             var result = await _response.Content.ReadAsStringAsync();
 
-            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Message = (string)null! });
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, 
+                new { Status = false, Message = (string)null! });
 
             Assert.Equal(table.Rows[0]["Status"], resultContent?.Status.ToString());
             Assert.Equal(table.Rows[0]["Message"], resultContent?.Message);
@@ -454,7 +470,8 @@ namespace ReadingClub.SpecFlow.StepDefinitions
         {
             var result = await _response.Content.ReadAsStringAsync();
 
-            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Message = (string)null! });
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, 
+                new { Status = false, Message = (string)null! });
 
             Assert.Equal(table.Rows[0]["Status"], resultContent?.Status.ToString());
             Assert.Equal(table.Rows[0]["Message"], resultContent?.Message);
@@ -465,7 +482,8 @@ namespace ReadingClub.SpecFlow.StepDefinitions
         {
             var result = await _response.Content.ReadAsStringAsync();
 
-            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (string)null! });
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, 
+                new { Status = false, Data = (string)null! });
 
             Assert.True(resultContent?.Status);
             Assert.NotNull(resultContent?.Data);
@@ -478,7 +496,8 @@ namespace ReadingClub.SpecFlow.StepDefinitions
         {
             var result = await _response.Content.ReadAsStringAsync();
 
-            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (string)null! });
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, 
+                new { Status = false, Data = (string)null! });
 
             Assert.True(resultContent?.Status);
             Assert.NotNull(resultContent?.Data);
@@ -503,7 +522,8 @@ namespace ReadingClub.SpecFlow.StepDefinitions
         {
             var result = await _response.Content.ReadAsStringAsync();
 
-            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { Status = false, Data = (UserDto)null! });
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, 
+                new { Status = false, Data = (UserDto)null! });
 
             Assert.True(resultContent?.Status);
             Assert.Equal(_userDto.UserName, resultContent?.Data.UserName);
@@ -555,13 +575,47 @@ namespace ReadingClub.SpecFlow.StepDefinitions
         {
             var result = await _response.Content.ReadAsStringAsync();
 
-            var resultContent = JsonConvert.DeserializeAnonymousType(result, new { NewStatus = false, Data = (UserDto)null! });
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, 
+                new { NewStatus = false, Data = (UserDto)null! });
 
             Assert.True(resultContent?.NewStatus);
             Assert.Equal(_updateUserDto.UserName, resultContent?.Data.UserName);
             Assert.Equal(_updateUserDto.Email.ToLower(), resultContent?.Data.Email);
         }
 
+        [Then(@"the following details of error for delete with invalid claims identity are")]
+        public async Task ThenTheFollowingDetailsOfErrorForDeleteWithInvalidClaimsIdentityAre(Table table)
+        {
+            var result = await _response.Content.ReadAsStringAsync();
 
+            var resultContent = JsonConvert.DeserializeAnonymousType(result,
+                new { Status = false, Message = (string)null! });
+
+            Assert.Equal(table.Rows[0]["Status"], resultContent?.Status.ToString());
+            Assert.Equal(table.Rows[0]["Message"], resultContent?.Message);
+        }
+
+        [Then(@"the following delete details are")]
+        public async Task ThenTheFollowingDeleteDetailsAre(Table table)
+        {
+            var result = await _response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result, 
+                new { Status = false });
+
+            Assert.Equal(table.Rows[0]["Status"], resultContent?.Status.ToString());
+        }
+
+        [Then("the following details of errors for get logged user are")]
+        public async Task ThenTheFollowingDetailsOfErrorsForGetLoggedUserAre(Table table)
+        {
+            var result = await _response.Content.ReadAsStringAsync();
+
+            var resultContent = JsonConvert.DeserializeAnonymousType(result,
+                new { Status = false, Message = (string)null! });
+
+            Assert.Equal(table.Rows[0]["Status"], resultContent?.Status.ToString());
+            Assert.Equal(table.Rows[0]["Message"], resultContent?.Message);
+        }
     }
 }
