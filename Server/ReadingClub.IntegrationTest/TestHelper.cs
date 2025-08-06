@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using ReadingClub.Domain;
 using ReadingClub.Infrastructure.Common.Helpers;
-using ReadingClub.Infrastructure.DTO.Book;
 using ReadingClub.Infrastructure.DTO.User;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -15,6 +14,28 @@ namespace ReadingClub.IntegrationTest
     public static class TestHelper
     {
         public static string OriginalPassword { get; } = "password";
+
+        public static async Task DeleteTables()
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.Test.json")
+                .Build();
+
+            var connectionString = configuration["ConnectionString"]!;
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                var sqlQueryDropuUersBooks = "DROP TABLE usersBooks;";
+                await connection.ExecuteAsync(sqlQueryDropuUersBooks);
+
+                var sqlQueryDropBooks = "DROP TABLE books;";
+                await connection.ExecuteAsync(sqlQueryDropBooks);
+
+                var sqlQueryDropUsers = "DROP TABLE users;";
+                await connection.ExecuteAsync(sqlQueryDropUsers);
+            }
+        }
 
         public static async Task<bool> IsBookInReadingListOfUserRead(int bookId, int userId)
         {
